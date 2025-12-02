@@ -17,7 +17,7 @@
 				<form class="needs-validation" action="PersonalController" method="POST" novalidate > 
 				
 					<h1 class="text-center text-primary"> Inicio del proyecto </h1>
-					<h2 class = "text-center bg-success">GAAAAAA</h2>
+					<h2 class = "text-center bg-success">12321312313213212313</h2>
 																
 				</form>				
 				
