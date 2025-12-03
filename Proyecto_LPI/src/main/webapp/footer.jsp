@@ -22,5 +22,8 @@
 	  })
 	})()			
 	</script>	
+<script type="text/javascript">
+const carousel = new bootstrap.Carousel('#carouselExampleCaptions');
+</script>
 	
 </footer>
