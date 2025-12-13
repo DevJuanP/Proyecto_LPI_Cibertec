@@ -1,0 +1,12 @@
+CREATE TABLE UserRole (
+    UserRoleId BINARY(16) PRIMARY KEY,
+    UserId BINARY(16) NOT NULL,
+    RoleId BINARY(16) NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_userrole_user FOREIGN KEY (UserId) REFERENCES User(UserId) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_userrole_role FOREIGN KEY (RoleId) REFERENCES Role(RoleId) ON UPDATE CASCADE,
+    UNIQUE KEY uk_user_role (UserId, RoleId),
+    INDEX idx_userrole_user (UserId),
+    INDEX idx_userrole_role (RoleId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -10,7 +10,7 @@ public final class DatabaseConnection {
 	private static final String databaseName = "bibliotecadb_growthwar";
 	private static final String user = "bibliotecadb_growthwar";
 	private static final String password = "0236195001c413d0e74a09260f24c743dc137858";
-	private static final String url = "jdbc:mysql://"+host+":"+port+"/"+databaseName+"?serverTimezone=America/Lima";
+	private static final String url = "jdbc:mysql://"+host+":"+port+"/"+databaseName+"?serverTimezone=UTC";
 	
 	public static Connection getConnection() throws SQLException, ClassNotFoundException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
