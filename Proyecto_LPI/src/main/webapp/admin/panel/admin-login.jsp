@@ -1,3 +1,4 @@
+<!-- src/main/webapp/admin/panel/admin-login.jsp -->
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="es">
@@ -137,6 +138,14 @@
                     <div class="alert alert-success d-flex align-items-center" role="alert">
                         <i class="bi bi-check-circle-fill me-2"></i>
                         <div>Sesión cerrada correctamente</div>
+                    </div>
+                <% } %>
+                
+                <!-- Unauthorized Access Message -->
+                <% if ("unauthorized".equals(request.getParameter("error"))) { %>
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>No tiene permisos de administrador. Su sesión ha sido cerrada.</div>
                     </div>
                 <% } %>
                 

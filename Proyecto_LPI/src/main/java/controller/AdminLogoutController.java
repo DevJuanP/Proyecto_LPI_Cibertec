@@ -9,9 +9,14 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
+/**
+ * Controlador para cerrar la sesión del administrador.
+ */
 @WebServlet("/admin/logout")
 public class AdminLogoutController extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    
+    private static final String LOGIN_PAGE = "/admin/login";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -25,13 +30,19 @@ public class AdminLogoutController extends HttpServlet {
         performLogout(request, response);
     }
 
-    private void performLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    /**
+     * Invalida la sesión actual y redirige al login con mensaje de éxito.
+     */
+    private void performLogout(HttpServletRequest request, HttpServletResponse response) 
+            throws IOException {
+        
         HttpSession session = request.getSession(false);
         
         if (session != null) {
             session.invalidate();
         }
         
-        response.sendRedirect(request.getContextPath() + "/admin/login?logout=success");
+        String contextPath = request.getContextPath();
+        response.sendRedirect(contextPath + LOGIN_PAGE + "?logout=success");
     }
 }

@@ -83,6 +83,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo -e "${YELLOW}Compilando filter...${NC}"
+javac -encoding UTF-8 -cp "$CLASSPATH:build/classes" -d build/classes src/main/java/filter/*.java
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error compilando filter${NC}"
+    exit 1
+fi
+
 echo -e "${YELLOW}Compilando controladores...${NC}"
 javac -encoding UTF-8 -cp "$CLASSPATH:build/classes" -d build/classes src/main/java/controller/*.java
 if [ $? -ne 0 ]; then
