@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class UserRepository {
+public class UserRepository implements IUserRepository {
 
     public User findById(String userId) throws SQLException, ClassNotFoundException {
         String sql = "SELECT BIN_TO_UUID(u.UserId) as UserId, u.Email, u.Password, " +

@@ -1,4 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="model.User" %>
+<%
+    User adminUser = (User) session.getAttribute("adminUser");
+    String userEmail = adminUser != null ? adminUser.getEmail() : "Administrador";
+    String displayName = userEmail.split("@")[0];
+%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm" style="height: var(--topbar-height);">
     <div class="container-fluid">
         <!-- Sidebar Toggle Button (Mobile) -->
@@ -35,19 +41,28 @@
             <!-- User Profile -->
             <div class="dropdown">
                 <button class="btn btn-dark d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=3498db&color=fff" 
+                    <img src="https://ui-avatars.com/api/?name=<%= displayName %>&background=3498db&color=fff" 
                          class="rounded-circle me-2" 
                          width="35" 
                          height="35" 
                          alt="Admin">
-                    <span class="d-none d-md-inline">Administrador</span>
+                    <span class="d-none d-md-inline"><%= displayName %></span>
                     <i class="bi bi-chevron-down ms-2"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li class="px-3 py-2 border-bottom">
+                        <div class="small text-muted">Conectado como</div>
+                        <div class="fw-bold"><%= userEmail %></div>
+                    </li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Configuración</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/admin/logout" 
+                           onclick="return confirm('¿Está seguro que desea cerrar sesión?');">
+                            <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
