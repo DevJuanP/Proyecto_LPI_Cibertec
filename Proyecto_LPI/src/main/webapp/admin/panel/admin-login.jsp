@@ -148,6 +148,14 @@
                         <div>No tiene permisos de administrador. Su sesión ha sido cerrada.</div>
                     </div>
                 <% } %>
+
+                <!-- Forbidden Access Message -->
+                <% if ("forbidden".equals(request.getParameter("error"))) { %>
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>No tiene credenciales para ingresar al panel. Acceso prohibido.</div>
+                    </div>
+                <% } %>
                 
                 <!-- Error Message -->
                 <% if (request.getAttribute("error") != null) { %>

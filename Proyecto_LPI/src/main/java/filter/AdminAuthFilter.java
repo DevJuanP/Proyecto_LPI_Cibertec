@@ -57,7 +57,7 @@ public class AdminAuthFilter implements Filter {
                 session.invalidate();
                 httpResponse.sendRedirect(contextPath + "/admin/login?error=unauthorized");
             } else {
-                httpResponse.sendRedirect(contextPath + "/admin/login");
+                httpResponse.sendRedirect(contextPath + "/admin/login?error=forbidden");
             }
         }
     }
