@@ -1,0 +1,13 @@
+INSERT INTO Category (CategoryId, CategoryName, Description) VALUES
+(UUID_TO_BIN(UUID()), 'Ficción', 'Obras de ficción literaria'),
+(UUID_TO_BIN(UUID()), 'No Ficción', 'Obras basadas en hechos reales'),
+(UUID_TO_BIN(UUID()), 'Técnico', 'Libros técnicos y de referencia'),
+(UUID_TO_BIN(UUID()), 'Académico', 'Textos académicos y educativos'),
+(UUID_TO_BIN(UUID()), 'Infantil', 'Literatura infantil y juvenil'),
+(UUID_TO_BIN(UUID()), 'Poesía', 'Obras poéticas'),
+(UUID_TO_BIN(UUID()), 'Teatro', 'Obras teatrales'),
+(UUID_TO_BIN(UUID()), 'Ensayo', 'Ensayos y reflexiones'),
+(UUID_TO_BIN(UUID()), 'Ciencia Ficción', 'Ficción científica'),
+(UUID_TO_BIN(UUID()), 'Filosofía', 'Obras de filosofía'),
+(UUID_TO_BIN(UUID()), 'Filosofía política', 'Obras de filosofía política'),
+(UUID_TO_BIN(UUID()), 'Histórico', 'Novelas y textos históricos');

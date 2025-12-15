@@ -1,0 +1,23 @@
+CREATE TABLE Rental (
+    RentalId BINARY(16) PRIMARY KEY,
+    UserId BINARY(16) NOT NULL,
+    BookCopyId BINARY(16) NOT NULL,
+    RentalStatusId BINARY(16) NOT NULL,
+    RentalDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    DueDate DATETIME NOT NULL,
+    ReturnDate DATETIME NULL,
+    RentalDays INT NOT NULL,
+    DailyRate DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    TotalCost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    Notes TEXT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_rental_user FOREIGN KEY (UserId) REFERENCES User(UserId) ON UPDATE CASCADE,
+    CONSTRAINT fk_rental_bookcopy FOREIGN KEY (BookCopyId) REFERENCES BookCopy(BookCopyId) ON UPDATE CASCADE,
+    CONSTRAINT fk_rental_status FOREIGN KEY (RentalStatusId) REFERENCES RentalStatus(RentalStatusId) ON UPDATE CASCADE,
+    INDEX idx_rental_user (UserId),
+    INDEX idx_rental_bookcopy (BookCopyId),
+    INDEX idx_rental_status (RentalStatusId),
+    INDEX idx_rental_date (RentalDate),
+    INDEX idx_rental_duedate (DueDate)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

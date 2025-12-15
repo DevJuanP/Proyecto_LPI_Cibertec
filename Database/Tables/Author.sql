@@ -1,0 +1,20 @@
+CREATE TABLE Author (
+    AuthorId BINARY(16) PRIMARY KEY,
+    FullName VARCHAR(255) NOT NULL,
+    Pseudonym VARCHAR(255) NULL,
+    CountryId BINARY(16) NOT NULL,
+    StatusId BINARY(16) NOT NULL,
+    Biography TEXT NULL,
+    BirthDate DATE NULL,
+    DeathDate DATE NULL,
+    Website VARCHAR(500) NULL,
+    Email VARCHAR(255) NULL,
+    PhotoUrl VARCHAR(500) NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_author_country FOREIGN KEY (CountryId) REFERENCES Country(CountryId) ON UPDATE CASCADE,
+    CONSTRAINT fk_author_status FOREIGN KEY (StatusId) REFERENCES Status(StatusId) ON UPDATE CASCADE,
+    INDEX idx_author_fullname (FullName),
+    INDEX idx_author_country (CountryId),
+    INDEX idx_author_status (StatusId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
