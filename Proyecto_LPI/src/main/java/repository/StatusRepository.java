@@ -1,12 +1,17 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.Status;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StatusRepository implements IStatusRepository {
+    private final DbContext dbContext;
+    
+    public StatusRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public Status findById(String statusId) throws SQLException, ClassNotFoundException {
@@ -15,8 +20,9 @@ public class StatusRepository implements IStatusRepository {
                      "FROM Status " +
                      "WHERE StatusId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, statusId);
             ResultSet rs = ps.executeQuery();
@@ -35,8 +41,9 @@ public class StatusRepository implements IStatusRepository {
                      "FROM Status " +
                      "WHERE StatusName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, statusName);
             ResultSet rs = ps.executeQuery();
@@ -56,9 +63,9 @@ public class StatusRepository implements IStatusRepository {
                      "ORDER BY StatusName ASC";
         
         List<Status> statuses = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {

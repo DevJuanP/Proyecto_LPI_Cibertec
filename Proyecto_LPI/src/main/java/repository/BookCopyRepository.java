@@ -1,6 +1,6 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.BookCopy;
 import model.Book;
 import model.Author;
@@ -15,13 +15,19 @@ import java.util.List;
 import java.util.UUID;
 
 public class BookCopyRepository implements IBookCopyRepository {
+    private final DbContext dbContext;
+    
+    public BookCopyRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public BookCopy findById(String bookCopyId) throws SQLException, ClassNotFoundException {
         String sql = buildSelectQuery() + " WHERE bc.BookCopyId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopyId);
             ResultSet rs = ps.executeQuery();
@@ -38,9 +44,9 @@ public class BookCopyRepository implements IBookCopyRepository {
         String sql = buildSelectQuery() + " ORDER BY b.Title ASC, bc.CreatedAt ASC";
         
         List<BookCopy> bookCopies = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -57,9 +63,9 @@ public class BookCopyRepository implements IBookCopyRepository {
                      " ORDER BY bc.CreatedAt ASC";
         
         List<BookCopy> bookCopies = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookId);
             ResultSet rs = ps.executeQuery();
@@ -78,9 +84,9 @@ public class BookCopyRepository implements IBookCopyRepository {
                      " ORDER BY b.Title ASC, bc.CreatedAt ASC";
         
         List<BookCopy> bookCopies = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopyStatusId);
             ResultSet rs = ps.executeQuery();
@@ -100,9 +106,9 @@ public class BookCopyRepository implements IBookCopyRepository {
                      " ORDER BY bc.CreatedAt ASC";
         
         List<BookCopy> bookCopies = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookId);
             ResultSet rs = ps.executeQuery();
@@ -119,8 +125,9 @@ public class BookCopyRepository implements IBookCopyRepository {
         String sql = "INSERT INTO BookCopy (BookCopyId, BookId, BookCopyStatusId, Notes) " +
                      "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             String bookCopyId = UUID.randomUUID().toString();
             bookCopy.setBookCopyId(bookCopyId);
@@ -140,8 +147,9 @@ public class BookCopyRepository implements IBookCopyRepository {
                      "BookCopyStatusId = UUID_TO_BIN(?), Notes = ? " +
                      "WHERE BookCopyId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopy.getBookId());
             ps.setString(2, bookCopy.getBookCopyStatusId());
@@ -156,8 +164,9 @@ public class BookCopyRepository implements IBookCopyRepository {
     public void delete(String bookCopyId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM BookCopy WHERE BookCopyId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopyId);
             ps.executeUpdate();
@@ -168,8 +177,9 @@ public class BookCopyRepository implements IBookCopyRepository {
     public int countByBook(String bookId) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM BookCopy WHERE BookId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookId);
             ResultSet rs = ps.executeQuery();
@@ -187,8 +197,9 @@ public class BookCopyRepository implements IBookCopyRepository {
                      "INNER JOIN BookCopyStatus bcs ON bc.BookCopyStatusId = bcs.BookCopyStatusId " +
                      "WHERE bc.BookId = UUID_TO_BIN(?) AND bcs.BookCopyStatusName = 'Available'";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookId);
             ResultSet rs = ps.executeQuery();

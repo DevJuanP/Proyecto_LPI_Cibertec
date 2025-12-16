@@ -23,7 +23,7 @@ public class AdminLoginController extends BaseServlet {
     private static final String ADMIN_PANEL = "/admin/panel";
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGetScoped(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
         if (SessionUtil.isAuthenticated(request) && SessionUtil.isAdmin(request)) {
@@ -35,7 +35,7 @@ public class AdminLoginController extends BaseServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPostScoped(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
         String email = request.getParameter("email");

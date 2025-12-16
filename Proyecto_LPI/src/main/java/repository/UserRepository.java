@@ -1,6 +1,6 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.User;
 import model.Role;
 import model.Status;
@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.UUID;
 
 public class UserRepository implements IUserRepository {
+    private final DbContext dbContext;
+    
+    public UserRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     public User findById(String userId) throws SQLException, ClassNotFoundException {
         String sql = "SELECT BIN_TO_UUID(u.UserId) as UserId, u.Email, u.Password, " +
@@ -19,8 +24,9 @@ public class UserRepository implements IUserRepository {
                      "INNER JOIN Status s ON u.StatusId = s.StatusId " +
                      "WHERE u.UserId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -42,8 +48,9 @@ public class UserRepository implements IUserRepository {
                      "INNER JOIN Status s ON u.StatusId = s.StatusId " +
                      "WHERE u.Email = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -66,9 +73,9 @@ public class UserRepository implements IUserRepository {
                      "ORDER BY u.CreatedAt DESC";
         
         List<User> users = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -84,8 +91,9 @@ public class UserRepository implements IUserRepository {
         String sql = "INSERT INTO User (UserId, Email, Password, StatusId) " +
                      "VALUES (UUID_TO_BIN(?), ?, ?, UUID_TO_BIN(?))";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             String userId = UUID.randomUUID().toString();
             user.setUserId(userId);
@@ -103,8 +111,9 @@ public class UserRepository implements IUserRepository {
         String sql = "UPDATE User SET Email = ?, Password = ?, StatusId = UUID_TO_BIN(?) " +
                      "WHERE UserId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
@@ -118,8 +127,9 @@ public class UserRepository implements IUserRepository {
     public void delete(String userId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM User WHERE UserId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, userId);
             ps.executeUpdate();
@@ -129,8 +139,9 @@ public class UserRepository implements IUserRepository {
     public boolean existsByEmail(String email) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM User WHERE Email = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -149,9 +160,9 @@ public class UserRepository implements IUserRepository {
                      "WHERE ur.UserId = UUID_TO_BIN(?)";
         
         List<Role> roles = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -172,8 +183,9 @@ public class UserRepository implements IUserRepository {
         String sql = "INSERT INTO UserRole (UserRoleId, UserId, RoleId) " +
                      "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?))";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, UUID.randomUUID().toString());
             ps.setString(2, userId);
@@ -186,8 +198,9 @@ public class UserRepository implements IUserRepository {
     public void removeRoleFromUser(String userId, String roleId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM UserRole WHERE UserId = UUID_TO_BIN(?) AND RoleId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, userId);
             ps.setString(2, roleId);

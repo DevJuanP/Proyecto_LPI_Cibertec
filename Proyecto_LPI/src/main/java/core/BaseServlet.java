@@ -1,10 +1,13 @@
 package core;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
- * Clase base para todos los servlets de la aplicación.
- * Proporciona acceso fácil al contenedor de inyección de dependencias.
+ * Clase base mejorada para todos los servlets de la aplicación.
  */
 public abstract class BaseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -16,11 +19,53 @@ public abstract class BaseServlet extends HttpServlet {
         return AppStartup.getContainer(getServletContext());
     }
     
+    @Override
+    protected final void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        ServiceContainer container = getContainer();
+        
+        try (ServiceContainer.ServiceScope scope = container.beginScope()) {
+            doGetScoped(request, response);
+        } catch (Exception e) {
+            handleException(request, response, e);
+        }
+    }
+    
+    @Override
+    protected final void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        ServiceContainer container = getContainer();
+        
+        try (ServiceContainer.ServiceScope scope = container.beginScope()) {
+            doPostScoped(request, response);
+        } catch (Exception e) {
+            handleException(request, response, e);
+        }
+    }
+    
     /**
-     * Obtiene un servicio del contenedor por su tipo
-     * 
-     * @param serviceType Clase del servicio a obtener
-     * @return Instancia del servicio
+     * Sobrescribe este método en lugar de doGet()
+     * Se ejecuta automáticamente dentro de un scope activo
+     */
+    protected void doGetScoped(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        super.doGet(request, response);
+    }
+    
+    /**
+     * Sobrescribe este método en lugar de doPost()
+     * Se ejecuta automáticamente dentro de un scope activo
+     */
+    protected void doPostScoped(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        super.doPost(request, response);
+    }
+    
+    /**
+     * Obtiene un servicio del contenedor
+     * IMPORTANTE: Solo llamar desde doGetScoped/doPostScoped
      */
     protected <T> T getService(Class<T> serviceType) {
         return getContainer().getService(serviceType);
@@ -29,54 +74,36 @@ public abstract class BaseServlet extends HttpServlet {
     /**
      * Verifica si el usuario tiene una sesión activa
      */
-    protected boolean isAuthenticated() {
-        return getSession().getAttribute("user") != null;
+    protected boolean isAuthenticated(HttpServletRequest request) {
+        return request.getSession(false) != null && 
+               request.getSession().getAttribute("user") != null;
     }
     
     /**
      * Obtiene el usuario actual de la sesión
      */
-    protected Object getCurrentUser() {
-        return getSession().getAttribute("user");
-    }
-    
-    /**
-     * Helper para obtener la sesión actual
-     */
-    private jakarta.servlet.http.HttpSession getSession() {
-        // Este método será llamado desde doGet/doPost donde tenemos acceso al request
-        // En esos casos, la subclase puede pasar el request
-        throw new UnsupportedOperationException(
-            "Use getCurrentUser(HttpServletRequest request) en su lugar");
-    }
-    
-    /**
-     * Obtiene el usuario actual de la sesión (versión con request)
-     */
-    protected Object getCurrentUser(jakarta.servlet.http.HttpServletRequest request) {
+    protected Object getCurrentUser(HttpServletRequest request) {
+        if (request.getSession(false) == null) {
+            return null;
+        }
         return request.getSession().getAttribute("user");
-    }
-    
-    /**
-     * Verifica si el usuario tiene una sesión activa (versión con request)
-     */
-    protected boolean isAuthenticated(jakarta.servlet.http.HttpServletRequest request) {
-        return request.getSession().getAttribute("user") != null;
     }
     
     /**
      * Cierra la sesión del usuario
      */
-    protected void logout(jakarta.servlet.http.HttpServletRequest request) {
-        request.getSession().invalidate();
+    protected void logout(HttpServletRequest request) {
+        if (request.getSession(false) != null) {
+            request.getSession().invalidate();
+        }
     }
     
     /**
      * Redirige a una página de error con un mensaje
      */
-    protected void redirectToError(jakarta.servlet.http.HttpServletRequest request, 
-                                   jakarta.servlet.http.HttpServletResponse response,
-                                   String errorMessage) throws java.io.IOException {
+    protected void redirectToError(HttpServletRequest request, 
+                                   HttpServletResponse response,
+                                   String errorMessage) throws IOException {
         request.getSession().setAttribute("errorMessage", errorMessage);
         response.sendRedirect(request.getContextPath() + "/error.jsp");
     }
@@ -84,11 +111,24 @@ public abstract class BaseServlet extends HttpServlet {
     /**
      * Redirige a una página con un mensaje de éxito
      */
-    protected void redirectWithSuccess(jakarta.servlet.http.HttpServletRequest request,
-                                       jakarta.servlet.http.HttpServletResponse response,
+    protected void redirectWithSuccess(HttpServletRequest request,
+                                       HttpServletResponse response,
                                        String successMessage,
-                                       String redirectUrl) throws java.io.IOException {
+                                       String redirectUrl) throws IOException {
         request.getSession().setAttribute("successMessage", successMessage);
         response.sendRedirect(request.getContextPath() + redirectUrl);
+    }
+    
+    /**
+     * Maneja excepciones de forma centralizada
+     * Las subclases pueden sobrescribir este método para personalizar el manejo de errores
+     */
+    protected void handleException(HttpServletRequest request, 
+                                   HttpServletResponse response,
+                                   Exception e) throws ServletException, IOException {
+        System.err.println("Error en " + this.getClass().getSimpleName() + ": " + e.getMessage());
+        e.printStackTrace();
+        
+        redirectToError(request, response, "Error del servidor: " + e.getMessage());
     }
 }

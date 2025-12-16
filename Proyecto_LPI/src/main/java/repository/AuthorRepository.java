@@ -1,6 +1,6 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.Author;
 import model.Country;
 import model.Status;
@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.UUID;
 
 public class AuthorRepository implements IAuthorRepository {
+    private final DbContext dbContext;
+    
+    public AuthorRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public Author findById(String authorId) throws SQLException, ClassNotFoundException {
@@ -26,8 +31,9 @@ public class AuthorRepository implements IAuthorRepository {
                      "INNER JOIN Status s ON a.StatusId = s.StatusId " +
                      "WHERE a.AuthorId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, authorId);
             ResultSet rs = ps.executeQuery();
@@ -54,8 +60,9 @@ public class AuthorRepository implements IAuthorRepository {
                      "INNER JOIN Status s ON a.StatusId = s.StatusId " +
                      "WHERE a.FullName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, fullName);
             ResultSet rs = ps.executeQuery();
@@ -84,8 +91,9 @@ public class AuthorRepository implements IAuthorRepository {
         
         List<Author> authors = new ArrayList<>();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -112,9 +120,9 @@ public class AuthorRepository implements IAuthorRepository {
                      "ORDER BY a.FullName ASC";
         
         List<Author> authors = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, countryId);
             ResultSet rs = ps.executeQuery();
@@ -143,9 +151,9 @@ public class AuthorRepository implements IAuthorRepository {
                      "ORDER BY a.FullName ASC";
         
         List<Author> authors = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, statusId);
             ResultSet rs = ps.executeQuery();
@@ -163,8 +171,9 @@ public class AuthorRepository implements IAuthorRepository {
                      "Biography, BirthDate, DeathDate, Website, Email, PhotoUrl) " +
                      "VALUES (UUID_TO_BIN(?), ?, ?, UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?, ?, ?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             String authorId = UUID.randomUUID().toString();
             author.setAuthorId(authorId);
@@ -203,8 +212,9 @@ public class AuthorRepository implements IAuthorRepository {
                      "Website = ?, Email = ?, PhotoUrl = ? " +
                      "WHERE AuthorId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, author.getFullName());
             ps.setString(2, author.getPseudonym());
@@ -237,8 +247,9 @@ public class AuthorRepository implements IAuthorRepository {
     public void delete(String authorId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM Author WHERE AuthorId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, authorId);
             ps.executeUpdate();
@@ -249,8 +260,9 @@ public class AuthorRepository implements IAuthorRepository {
     public boolean existsByName(String fullName) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM Author WHERE FullName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, fullName);
             ResultSet rs = ps.executeQuery();

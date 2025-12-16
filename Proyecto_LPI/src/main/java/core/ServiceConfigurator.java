@@ -1,5 +1,6 @@
 package core;
 
+import connection.DbContext;
 import repository.AuthorRepository;
 import repository.BookCopyRepository;
 import repository.BookCopyStatusRepository;
@@ -37,39 +38,39 @@ public class ServiceConfigurator {
     public static void configure(ServiceContainer container) {
         System.out.println("Configurando servicios...\n");
         
-        // ========================================
-        // CONFIGURACIÓN DE REPOSITORIOS
-        // ========================================
+        configureDataLayer(container);
         configureRepositories(container);
-        
-        // ========================================
-        // CONFIGURACIÓN DE SERVICIOS DE NEGOCIO
-        // ========================================
         configureBusinessServices(container);
         
-        // ========================================
-        // OTROS SERVICIOS (Email, Storage, etc.)
-        // ========================================
-        // configureUtilityServices(container);
-        
         System.out.println("Servicios configurados correctamente\n");
+    }
+
+    /**
+     * Configura la capa de acceso a datos
+     */
+    private static void configureDataLayer(ServiceContainer container) {
+        System.out.println("  [Scoped] Capa de datos:");
+        
+        container.addScoped(DbContext.class, DbContext.class);
+        
+        System.out.println("    ✓ DbContext (conexión por request)");
     }
     
     /**
      * Configura todos los repositorios
      */
     private static void configureRepositories(ServiceContainer container) {
-        container.addSingleton(IUserRepository.class, UserRepository.class);
-        container.addSingleton(IAuthorRepository.class, AuthorRepository.class);
-        container.addSingleton(IBookCopyRepository.class, BookCopyRepository.class);
-        container.addSingleton(IBookCopyStatusRepository.class, BookCopyStatusRepository.class);
-        container.addSingleton(IBookRepository.class, BookRepository.class);
-        container.addSingleton(IBookStatusRepository.class, BookStatusRepository.class);
-        container.addSingleton(ICategoryRepository.class, CategoryRepository.class);
-        container.addSingleton(ICountryRepository.class, CountryRepository.class);
-        container.addSingleton(IRentalRepository.class, RentalRepository.class);
-        container.addSingleton(IRentalStatusRepository.class, RentalStatusRepository.class);
-        container.addSingleton(IStatusRepository.class, StatusRepository.class);
+        container.addScoped(IUserRepository.class, UserRepository.class);
+        container.addScoped(IAuthorRepository.class, AuthorRepository.class);
+        container.addScoped(IBookCopyRepository.class, BookCopyRepository.class);
+        container.addScoped(IBookCopyStatusRepository.class, BookCopyStatusRepository.class);
+        container.addScoped(IBookRepository.class, BookRepository.class);
+        container.addScoped(IBookStatusRepository.class, BookStatusRepository.class);
+        container.addScoped(ICategoryRepository.class, CategoryRepository.class);
+        container.addScoped(ICountryRepository.class, CountryRepository.class);
+        container.addScoped(IRentalRepository.class, RentalRepository.class);
+        container.addScoped(IRentalStatusRepository.class, RentalStatusRepository.class);
+        container.addScoped(IStatusRepository.class, StatusRepository.class);
         
         System.out.println("✓ Repositorios configurados");
     }
@@ -78,16 +79,7 @@ public class ServiceConfigurator {
      * Configura servicios de lógica de negocio
      */
     private static void configureBusinessServices(ServiceContainer container) {
-        // Los servicios pueden ser singleton o transient según las necesidades
-        
-        // Singleton - una sola instancia compartida
-        container.addSingleton(IUserService.class, UserService.class);
-        // container.addSingleton(LibroService.class, LibroService.class);
-        // container.addSingleton(AutorService.class, AutorService.class);
-        // container.addSingleton(AlquilerService.class, AlquilerService.class);
-        
-        // Ejemplo de servicio Transient (nueva instancia cada vez)
-        // container.addTransient(EmailService.class, EmailService.class);
+        container.addScoped(IUserService.class, UserService.class);
         
         System.out.println("✓ Servicios de negocio configurados");
     }

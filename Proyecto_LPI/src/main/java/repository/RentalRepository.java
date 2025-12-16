@@ -1,6 +1,6 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.Rental;
 import model.User;
 import model.BookCopy;
@@ -18,13 +18,19 @@ import java.util.List;
 import java.util.UUID;
 
 public class RentalRepository implements IRentalRepository {
+    private final DbContext dbContext;
+    
+    public RentalRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public Rental findById(String rentalId) throws SQLException, ClassNotFoundException {
         String sql = buildSelectQuery() + " WHERE r.RentalId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, rentalId);
             ResultSet rs = ps.executeQuery();
@@ -41,9 +47,9 @@ public class RentalRepository implements IRentalRepository {
         String sql = buildSelectQuery() + " ORDER BY r.RentalDate DESC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -60,9 +66,9 @@ public class RentalRepository implements IRentalRepository {
                      " ORDER BY r.RentalDate DESC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -81,9 +87,9 @@ public class RentalRepository implements IRentalRepository {
                      " ORDER BY r.RentalDate DESC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopyId);
             ResultSet rs = ps.executeQuery();
@@ -102,9 +108,9 @@ public class RentalRepository implements IRentalRepository {
                      " ORDER BY r.RentalDate DESC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, rentalStatusId);
             ResultSet rs = ps.executeQuery();
@@ -123,9 +129,9 @@ public class RentalRepository implements IRentalRepository {
                      " ORDER BY r.DueDate ASC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -143,9 +149,9 @@ public class RentalRepository implements IRentalRepository {
                      " ORDER BY r.DueDate ASC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -165,9 +171,9 @@ public class RentalRepository implements IRentalRepository {
                      " ORDER BY r.DueDate ASC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -185,9 +191,9 @@ public class RentalRepository implements IRentalRepository {
                      " ORDER BY r.DueDate ASC";
         
         List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, days);
             ResultSet rs = ps.executeQuery();
@@ -205,8 +211,9 @@ public class RentalRepository implements IRentalRepository {
                      "RentalDate, DueDate, ReturnDate, RentalDays, DailyRate, TotalCost, Notes) " +
                      "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?, ?, ?, ?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             String rentalId = UUID.randomUUID().toString();
             rental.setRentalId(rentalId);
@@ -240,8 +247,9 @@ public class RentalRepository implements IRentalRepository {
                      "RentalDays = ?, DailyRate = ?, TotalCost = ?, Notes = ? " +
                      "WHERE RentalId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, rental.getUserId());
             ps.setString(2, rental.getBookCopyId());
@@ -269,8 +277,9 @@ public class RentalRepository implements IRentalRepository {
     public void delete(String rentalId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM Rental WHERE RentalId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, rentalId);
             ps.executeUpdate();
@@ -283,8 +292,9 @@ public class RentalRepository implements IRentalRepository {
                      "INNER JOIN RentalStatus rs ON r.RentalStatusId = rs.RentalStatusId " +
                      "WHERE r.BookCopyId = UUID_TO_BIN(?) AND rs.RentalStatusName = 'Active'";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopyId);
             ResultSet rs = ps.executeQuery();

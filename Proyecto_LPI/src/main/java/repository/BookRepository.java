@@ -1,6 +1,6 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.Book;
 import model.Author;
 import model.Category;
@@ -13,6 +13,11 @@ import java.util.List;
 import java.util.UUID;
 
 public class BookRepository implements IBookRepository {
+    private final DbContext dbContext;
+    
+    public BookRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public Book findById(String bookId) throws SQLException, ClassNotFoundException {
@@ -47,8 +52,9 @@ public class BookRepository implements IBookRepository {
                      "INNER JOIN BookStatus bs ON b.BookStatusId = bs.BookStatusId " +
                      "WHERE b.BookId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookId);
             ResultSet rs = ps.executeQuery();
@@ -93,8 +99,9 @@ public class BookRepository implements IBookRepository {
                      "INNER JOIN BookStatus bs ON b.BookStatusId = bs.BookStatusId " +
                      "WHERE b.ISBN = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, isbn);
             ResultSet rs = ps.executeQuery();
@@ -140,9 +147,9 @@ public class BookRepository implements IBookRepository {
                      "ORDER BY b.Title ASC";
         
         List<Book> books = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -188,8 +195,9 @@ public class BookRepository implements IBookRepository {
         
         List<Book> books = new ArrayList<>();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, authorId);
             ResultSet rs = ps.executeQuery();
@@ -236,9 +244,9 @@ public class BookRepository implements IBookRepository {
                      "ORDER BY b.Title ASC";
         
         List<Book> books = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, categoryId);
             ResultSet rs = ps.executeQuery();
@@ -285,9 +293,9 @@ public class BookRepository implements IBookRepository {
                      "ORDER BY b.Title ASC";
         
         List<Book> books = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookStatusId);
             ResultSet rs = ps.executeQuery();
@@ -334,9 +342,9 @@ public class BookRepository implements IBookRepository {
                      "ORDER BY b.Title ASC";
         
         List<Book> books = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, "%" + title + "%");
             ResultSet rs = ps.executeQuery();
@@ -354,8 +362,9 @@ public class BookRepository implements IBookRepository {
                      "PublicationYear, Publisher, Pages, Language, Description, CoverImageUrl, BookStatusId) " +
                      "VALUES (UUID_TO_BIN(?), ?, ?, UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?, ?, ?, UUID_TO_BIN(?))";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             String bookId = UUID.randomUUID().toString();
             book.setBookId(bookId);
@@ -396,8 +405,9 @@ public class BookRepository implements IBookRepository {
                      "Language = ?, Description = ?, CoverImageUrl = ?, BookStatusId = UUID_TO_BIN(?) " +
                      "WHERE BookId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, book.getIsbn());
             ps.setString(2, book.getTitle());
@@ -432,8 +442,9 @@ public class BookRepository implements IBookRepository {
     public void delete(String bookId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM Book WHERE BookId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookId);
             ps.executeUpdate();
@@ -444,8 +455,9 @@ public class BookRepository implements IBookRepository {
     public boolean existsByIsbn(String isbn) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM Book WHERE ISBN = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, isbn);
             ResultSet rs = ps.executeQuery();

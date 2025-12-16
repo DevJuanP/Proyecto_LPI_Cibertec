@@ -1,12 +1,17 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.Country;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CountryRepository implements ICountryRepository {
+    private final DbContext dbContext;
+    
+    public CountryRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public Country findById(String countryId) throws SQLException, ClassNotFoundException {
@@ -15,8 +20,9 @@ public class CountryRepository implements ICountryRepository {
                      "FROM Country " +
                      "WHERE CountryId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, countryId);
             ResultSet rs = ps.executeQuery();
@@ -35,8 +41,9 @@ public class CountryRepository implements ICountryRepository {
                      "FROM Country " +
                      "WHERE CountryName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, countryName);
             ResultSet rs = ps.executeQuery();
@@ -56,9 +63,9 @@ public class CountryRepository implements ICountryRepository {
                      "ORDER BY CountryName ASC";
         
         List<Country> countries = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {

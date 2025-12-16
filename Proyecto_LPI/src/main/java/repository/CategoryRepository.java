@@ -1,6 +1,6 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.Category;
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.UUID;
 
 public class CategoryRepository implements ICategoryRepository {
+    private final DbContext dbContext;
+    
+    public CategoryRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public Category findById(String categoryId) throws SQLException, ClassNotFoundException {
@@ -16,9 +21,9 @@ public class CategoryRepository implements ICategoryRepository {
                      "FROM Category " +
                      "WHERE CategoryId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, categoryId);
             ResultSet rs = ps.executeQuery();
             
@@ -36,8 +41,9 @@ public class CategoryRepository implements ICategoryRepository {
                      "FROM Category " +
                      "WHERE CategoryName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, categoryName);
             ResultSet rs = ps.executeQuery();
@@ -57,9 +63,9 @@ public class CategoryRepository implements ICategoryRepository {
                      "ORDER BY CategoryName ASC";
         
         List<Category> categories = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
@@ -74,8 +80,10 @@ public class CategoryRepository implements ICategoryRepository {
         String sql = "INSERT INTO Category (CategoryId, CategoryName, Description) " +
                      "VALUES (UUID_TO_BIN(?), ?, ?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             
             String categoryId = UUID.randomUUID().toString();
             category.setCategoryId(categoryId);
@@ -93,8 +101,10 @@ public class CategoryRepository implements ICategoryRepository {
         String sql = "UPDATE Category SET CategoryName = ?, Description = ? " +
                      "WHERE CategoryId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             
             ps.setString(1, category.getCategoryName());
             ps.setString(2, category.getDescription());
@@ -108,8 +118,10 @@ public class CategoryRepository implements ICategoryRepository {
     public void delete(String categoryId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM Category WHERE CategoryId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             
             ps.setString(1, categoryId);
             ps.executeUpdate();
@@ -120,8 +132,9 @@ public class CategoryRepository implements ICategoryRepository {
     public boolean existsByName(String categoryName) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM Category WHERE CategoryName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, categoryName);
             ResultSet rs = ps.executeQuery();

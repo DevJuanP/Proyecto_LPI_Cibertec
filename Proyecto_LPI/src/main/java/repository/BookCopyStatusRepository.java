@@ -1,12 +1,17 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.BookCopyStatus;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookCopyStatusRepository implements IBookCopyStatusRepository {
+    private final DbContext dbContext;
+    
+    public BookCopyStatusRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public BookCopyStatus findById(String bookCopyStatusId) throws SQLException, ClassNotFoundException {
@@ -15,8 +20,9 @@ public class BookCopyStatusRepository implements IBookCopyStatusRepository {
                      "FROM BookCopyStatus " +
                      "WHERE BookCopyStatusId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopyStatusId);
             ResultSet rs = ps.executeQuery();
@@ -35,8 +41,9 @@ public class BookCopyStatusRepository implements IBookCopyStatusRepository {
                      "FROM BookCopyStatus " +
                      "WHERE BookCopyStatusName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, bookCopyStatusName);
             ResultSet rs = ps.executeQuery();
@@ -56,9 +63,9 @@ public class BookCopyStatusRepository implements IBookCopyStatusRepository {
                      "ORDER BY BookCopyStatusName ASC";
         
         List<BookCopyStatus> statuses = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {

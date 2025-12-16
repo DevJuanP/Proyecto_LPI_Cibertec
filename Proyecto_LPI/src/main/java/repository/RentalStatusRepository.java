@@ -1,12 +1,17 @@
 package repository;
 
-import connection.DatabaseConnection;
+import connection.DbContext;
 import model.RentalStatus;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RentalStatusRepository implements IRentalStatusRepository {
+    private final DbContext dbContext;
+    
+    public RentalStatusRepository(DbContext dbContext) {
+        this.dbContext = dbContext;
+    }
 
     @Override
     public RentalStatus findById(String rentalStatusId) throws SQLException, ClassNotFoundException {
@@ -15,8 +20,9 @@ public class RentalStatusRepository implements IRentalStatusRepository {
                      "FROM RentalStatus " +
                      "WHERE RentalStatusId = UUID_TO_BIN(?)";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, rentalStatusId);
             ResultSet rs = ps.executeQuery();
@@ -35,8 +41,9 @@ public class RentalStatusRepository implements IRentalStatusRepository {
                      "FROM RentalStatus " +
                      "WHERE RentalStatusName = ?";
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, rentalStatusName);
             ResultSet rs = ps.executeQuery();
@@ -56,9 +63,9 @@ public class RentalStatusRepository implements IRentalStatusRepository {
                      "ORDER BY RentalStatusName ASC";
         
         List<RentalStatus> statuses = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             while (rs.next()) {
