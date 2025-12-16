@@ -1,6 +1,26 @@
 package core;
 
+import repository.AuthorRepository;
+import repository.BookCopyRepository;
+import repository.BookCopyStatusRepository;
+import repository.BookRepository;
+import repository.BookStatusRepository;
+import repository.CategoryRepository;
+import repository.CountryRepository;
+import repository.IAuthorRepository;
+import repository.IBookCopyRepository;
+import repository.IBookCopyStatusRepository;
+import repository.IBookRepository;
+import repository.IBookStatusRepository;
+import repository.ICategoryRepository;
+import repository.ICountryRepository;
+import repository.IRentalRepository;
+import repository.IRentalStatusRepository;
+import repository.IStatusRepository;
 import repository.IUserRepository;
+import repository.RentalRepository;
+import repository.RentalStatusRepository;
+import repository.StatusRepository;
 import repository.UserRepository;
 import service.IUserService;
 import service.UserService;
@@ -39,11 +59,17 @@ public class ServiceConfigurator {
      * Configura todos los repositorios
      */
     private static void configureRepositories(ServiceContainer container) {
-        // Los repositorios generalmente son singleton porque no mantienen estado
         container.addSingleton(IUserRepository.class, UserRepository.class);
-        // container.addSingleton(LibroRepository.class, LibroRepository.class);
-        // container.addSingleton(AutorRepository.class, AutorRepository.class);
-        // container.addSingleton(AlquilerRepository.class, AlquilerRepository.class);
+        container.addSingleton(IAuthorRepository.class, AuthorRepository.class);
+        container.addSingleton(IBookCopyRepository.class, BookCopyRepository.class);
+        container.addSingleton(IBookCopyStatusRepository.class, BookCopyStatusRepository.class);
+        container.addSingleton(IBookRepository.class, BookRepository.class);
+        container.addSingleton(IBookStatusRepository.class, BookStatusRepository.class);
+        container.addSingleton(ICategoryRepository.class, CategoryRepository.class);
+        container.addSingleton(ICountryRepository.class, CountryRepository.class);
+        container.addSingleton(IRentalRepository.class, RentalRepository.class);
+        container.addSingleton(IRentalStatusRepository.class, RentalStatusRepository.class);
+        container.addSingleton(IStatusRepository.class, StatusRepository.class);
         
         System.out.println("✓ Repositorios configurados");
     }
