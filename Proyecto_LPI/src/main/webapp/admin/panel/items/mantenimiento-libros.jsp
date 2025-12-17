@@ -1,3 +1,4 @@
+<!-- src/main/webapp/admin/panel/items/mantenimiento-libros.jsp -->
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <div class="content-header">
     <div class="d-flex justify-content-between align-items-center">

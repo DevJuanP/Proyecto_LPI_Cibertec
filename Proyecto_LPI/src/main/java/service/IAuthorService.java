@@ -1,0 +1,18 @@
+package service;
+
+import java.sql.SQLException;
+
+import dto.author.AuthorData;
+import dto.shared.PagedResult;
+import model.Author;
+
+public interface IAuthorService {
+    PagedResult<AuthorData> getRegisteredAuthors(int page, int pageSize, String search, 
+            String countryId, String statusId) throws SQLException, ClassNotFoundException;
+    int getTotalAuthorsCount() throws SQLException, ClassNotFoundException;
+    int getAuthorsWithBooksCount() throws SQLException, ClassNotFoundException;
+    Author findById(String authorId) throws SQLException, ClassNotFoundException;
+    void save(Author author) throws SQLException, ClassNotFoundException;
+    void update(Author author) throws SQLException, ClassNotFoundException;
+    void delete(String authorId) throws SQLException, ClassNotFoundException;
+}

@@ -23,7 +23,13 @@ import repository.RentalRepository;
 import repository.RentalStatusRepository;
 import repository.StatusRepository;
 import repository.UserRepository;
+import service.AuthorService;
+import service.CountryService;
+import service.IAuthorService;
+import service.ICountryService;
+import service.IStatusService;
 import service.IUserService;
+import service.StatusService;
 import service.UserService;
 
 /**
@@ -80,7 +86,10 @@ public class ServiceConfigurator {
      */
     private static void configureBusinessServices(ServiceContainer container) {
         container.addScoped(IUserService.class, UserService.class);
-        
+        container.addScoped(IAuthorService.class, AuthorService.class);
+        container.addScoped(ICountryService.class, CountryService.class);
+        container.addScoped(IStatusService.class, StatusService.class);
+
         System.out.println("✓ Servicios de negocio configurados");
     }
 }

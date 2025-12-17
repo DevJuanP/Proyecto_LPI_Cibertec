@@ -69,6 +69,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo -e "${YELLOW}Compilando DTOs...${NC}"
+javac -encoding UTF-8 -cp "$CLASSPATH:build/classes" -d build/classes src/main/java/dto/**/*.java
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error compilando DTOs${NC}"
+    exit 1
+fi
+
 echo -e "${YELLOW}Compilando servicios...${NC}"
 javac -encoding UTF-8 -cp "$CLASSPATH:build/classes" -d build/classes src/main/java/service/*.java
 if [ $? -ne 0 ]; then
