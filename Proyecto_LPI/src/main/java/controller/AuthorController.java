@@ -13,6 +13,7 @@ import model.Author;
 import service.IAuthorService;
 import service.ICountryService;
 import service.IStatusService;
+import util.DateUtil;
 import util.SessionUtil;
 
 /**
@@ -149,13 +150,13 @@ public class AuthorController extends BaseServlet {
         out.println("    <table class=\"table table-borderless\">");        
         out.println("      <tr>");
         out.println("        <th style=\"width: 40%\">Nacimiento:</th>");
-        out.println("        <td>" + (author.getBirthDate() != null ? author.getBirthDate().toString() : "-") + "</td>");
+        out.println("        <td>" + (DateUtil.formatYear(author.getBirthYear())) + "</td>");
         out.println("      </tr>");
         
-        if (author.getDeathDate() != null) {
+        if (author.getDeathYear() != null) {
             out.println("      <tr>");
             out.println("        <th>Fallecimiento:</th>");
-            out.println("        <td>" + author.getDeathDate().toString() + "</td>");
+            out.println("        <td>" + DateUtil.formatYear(author.getDeathYear()) + "</td>");
             out.println("      </tr>");
         }
         
@@ -307,14 +308,14 @@ public class AuthorController extends BaseServlet {
         author.setEmail(getStringOrNull(request.getParameter("email")));
         author.setPhotoUrl(getStringOrNull(request.getParameter("photoUrl")));
         
-        String birthDateStr = request.getParameter("birthDate");
-        if (birthDateStr != null && !birthDateStr.isEmpty()) {
-            author.setBirthDate(LocalDate.parse(birthDateStr));
+        String birthYearStr = request.getParameter("birthYear");
+        if (birthYearStr != null && !birthYearStr.isEmpty()) {
+            author.setBirthYear(Integer.parseInt(birthYearStr));
         }
         
-        String deathDateStr = request.getParameter("deathDate");
-        if (deathDateStr != null && !deathDateStr.isEmpty()) {
-            author.setDeathDate(LocalDate.parse(deathDateStr));
+        String deathYearStr = request.getParameter("deathYear");
+        if (deathYearStr != null && !deathYearStr.isEmpty()) {
+            author.setDeathYear(Integer.parseInt(deathYearStr));
         }
         
         String statusId = request.getParameter("statusId");

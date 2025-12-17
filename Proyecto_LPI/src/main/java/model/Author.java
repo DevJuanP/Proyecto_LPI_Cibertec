@@ -1,6 +1,5 @@
 package model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Author {
@@ -10,8 +9,8 @@ public class Author {
     private String countryId;
     private String statusId;
     private String biography;
-    private LocalDate birthDate;
-    private LocalDate deathDate;
+    private Integer birthYear;
+    private Integer deathYear;
     private String website;
     private String email;
     private String photoUrl;
@@ -79,20 +78,20 @@ public class Author {
         this.biography = biography;
     }
 
-    public LocalDate getBirthDate() {
-        return birthDate;
+    public Integer getBirthYear() {
+        return birthYear;
     }
 
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
+    public void setBirthYear(Integer birthYear) {
+        this.birthYear = birthYear;
     }
 
-    public LocalDate getDeathDate() {
-        return deathDate;
+    public Integer getDeathYear() {
+        return deathYear;
     }
 
-    public void setDeathDate(LocalDate deathDate) {
-        this.deathDate = deathDate;
+    public void setDeathYear(Integer deathYear) {
+        this.deathYear = deathYear;
     }
 
     public String getWebsite() {

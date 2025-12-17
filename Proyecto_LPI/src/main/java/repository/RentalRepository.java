@@ -332,7 +332,7 @@ public class RentalRepository implements IRentalRepository {
                // Author
                "BIN_TO_UUID(a.AuthorId) as AuthorIdFull, a.FullName, a.Pseudonym, " +
                "BIN_TO_UUID(a.CountryId) as AuthorCountryId, BIN_TO_UUID(a.StatusId) as AuthorStatusId, " +
-               "a.Biography, a.BirthDate, a.DeathDate, a.Website, a.Email as AuthorEmail, a.PhotoUrl, " +
+               "a.Biography, a.BirthYear, a.DeathYear, a.Website, a.Email as AuthorEmail, a.PhotoUrl, " +
                "a.CreatedAt as AuthorCreatedAt, a.UpdatedAt as AuthorUpdatedAt, " +
                // Country
                "BIN_TO_UUID(c.CountryId) as CountryIdFull, c.CountryName, c.CountryCode, " +
@@ -445,17 +445,8 @@ public class RentalRepository implements IRentalRepository {
         author.setCountryId(rs.getString("AuthorCountryId"));
         author.setStatusId(rs.getString("AuthorStatusId"));
         author.setBiography(rs.getString("Biography"));
-        
-        Date birthDate = rs.getDate("BirthDate");
-        if (birthDate != null) {
-            author.setBirthDate(birthDate.toLocalDate());
-        }
-        
-        Date deathDate = rs.getDate("DeathDate");
-        if (deathDate != null) {
-            author.setDeathDate(deathDate.toLocalDate());
-        }
-        
+        author.setBirthYear(rs.getObject("BirthYear", Integer.class));
+        author.setDeathYear(rs.getObject("DeathYear", Integer.class));
         author.setWebsite(rs.getString("Website"));
         author.setEmail(rs.getString("AuthorEmail"));
         author.setPhotoUrl(rs.getString("PhotoUrl"));

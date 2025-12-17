@@ -230,10 +230,10 @@
                                     </td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${not empty author.birthDate}">
-                                                ${author.birthDate}
-                                                <c:if test="${not empty author.deathDate}">
-                                                    - ${author.deathDate}
+                                            <c:when test="${not empty author.birthYear}">
+                                                ${author.birthYear}
+                                                <c:if test="${not empty author.deathYear}">
+                                                    - ${author.deathYear}
                                                 </c:if>
                                             </c:when>
                                             <c:otherwise>
@@ -382,12 +382,29 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Fecha de Nacimiento</label>
-                            <input type="date" name="birthDate" class="form-control">
+                            <label for="birthYear" class="form-label">Año de Nacimiento</label>
+                            <input type="number" 
+                                name="birthYear" 
+                                id="birthYear"
+                                class="form-control"
+                                placeholder="ej. 1950 o -300 (a.C.)"
+                                min="-3000" 
+                                max="2025"
+                                step="1">
+                            <div class="form-text">Usa números negativos para años a.C. (ej. -300 = 300 a.C.)</div>
                         </div>
+
                         <div class="col-md-4">
-                            <label class="form-label">Fecha de Fallecimiento</label>
-                            <input type="date" name="deathDate" class="form-control">
+                            <label for="deathYear" class="form-label">Año de Fallecimiento</label>
+                            <input type="number" 
+                                name="deathYear" 
+                                id="deathYear"
+                                class="form-control"
+                                placeholder="ej. 2020 o -200 (a.C.)"
+                                min="-3000" 
+                                max="2025"
+                                step="1">
+                            <div class="form-text">Usa números negativos para años a.C. Deja vacío si vive.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Sitio Web</label>

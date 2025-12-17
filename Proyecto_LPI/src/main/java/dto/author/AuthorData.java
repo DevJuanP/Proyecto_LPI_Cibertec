@@ -7,8 +7,8 @@ public class AuthorData {
     private final String fullName;
     private final String pseudonym;
     private final String biography;
-    private final String birthDate;
-    private final String deathDate;
+    private final String birthYear;
+    private final String deathYear;
     private final String website;
     private final String email;
     private final String photoUrl;
@@ -20,7 +20,7 @@ public class AuthorData {
     private final String statusName;
 
     public AuthorData(String authorId, String fullName, String pseudonym, 
-                      String biography, String birthDate, String deathDate,
+                      String biography, String birthYear, String deathYear,
                       String website, String email, String photoUrl,
                       LocalDateTime createdAt, LocalDateTime updatedAt,
                       String countryId, String countryName, 
@@ -29,8 +29,8 @@ public class AuthorData {
         this.fullName = fullName;
         this.pseudonym = pseudonym;
         this.biography = biography;
-        this.birthDate = birthDate;
-        this.deathDate = deathDate;
+        this.birthYear = birthYear;
+        this.deathYear = deathYear;
         this.website = website;
         this.email = email;
         this.photoUrl = photoUrl;
@@ -46,8 +46,8 @@ public class AuthorData {
     public String getFullName() { return fullName; }
     public String getPseudonym() { return pseudonym; }
     public String getBiography() { return biography; }
-    public String getBirthDate() { return birthDate; }
-    public String getDeathDate() { return deathDate; }
+    public String getBirthYear() { return birthYear; }
+    public String getDeathYear() { return deathYear; }
     public String getWebsite() { return website; }
     public String getEmail() { return email; }
     public String getPhotoUrl() { return photoUrl; }
