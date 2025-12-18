@@ -516,8 +516,7 @@
 
     // Edit author
     function editAuthor(authorId) {
-        // TODO: Implementar edición
-        window.location.href = '${pageContext.request.contextPath}/author?action=edit&id=' + authorId;
+        window.location.href = '${pageContext.request.contextPath}/admin/panel?page=edit-autor&id=' + authorId;
     }
 
     // Delete author

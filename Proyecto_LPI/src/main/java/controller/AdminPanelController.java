@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.Author;
 import model.Country;
 import service.IAuthorService;
 import service.ICountryService;
@@ -48,6 +49,9 @@ public class AdminPanelController extends BaseServlet {
                 case "mantenimiento-autores":
                     loadAuthorsData(request);
                     break;
+                case "edit-autor":
+                    loadEditAuthorData(request);
+                    break;
                 case "mantenimiento-libros":
                     loadBooksData(request);
                     break;
@@ -80,31 +84,56 @@ public class AdminPanelController extends BaseServlet {
     private void loadAuthorsData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         IAuthorService authorService = getService(IAuthorService.class);
         ICountryService countryService = getService(ICountryService.class);
-        //ICountryRepository countryRepository = getService(ICountryRepository.class);
         
-        // Obtener parámetros de paginación y filtros
         int currentPage = getIntParameter(request, "p", 1);
         int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
         String search = request.getParameter("search");
         String countryId = request.getParameter("countryId");
         String statusId = request.getParameter("statusId");
         
-        // Obtener autores paginados
         PagedResult<AuthorData> authorsResult = authorService.getRegisteredAuthors(
             currentPage, pageSize, search, countryId, statusId);
         
-        // Obtener lista de países para el filtro
         List<Country> countries = countryService.findAll();
         
-        // Establecer atributos en el request
         request.setAttribute("authorsResult", authorsResult);
         request.setAttribute("countries", countries);
         request.setAttribute("totalAuthors", authorService.getTotalAuthorsCount());
         
-        // Mantener valores de filtros en el request
         request.setAttribute("searchValue", search != null ? search : "");
         request.setAttribute("countryIdValue", countryId != null ? countryId : "");
         request.setAttribute("statusIdValue", statusId != null ? statusId : "");
+    }
+
+    /**
+     * Carga los datos para la página de edición de autor.
+     */
+    private void loadEditAuthorData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        String authorId = request.getParameter("id");
+        
+        if (authorId == null || authorId.isEmpty()) {
+            request.getSession().setAttribute("error", "ID de autor requerido");
+            request.setAttribute("page", "mantenimiento-autores");
+            return;
+        }
+        
+        IAuthorService authorService = getService(IAuthorService.class);
+        ICountryService countryService = getService(ICountryService.class);
+        
+        Author author = authorService.findById(authorId);
+        
+        if (author == null) {
+            request.getSession().setAttribute("error", "Autor no encontrado");
+            request.setAttribute("page", "mantenimiento-autores");
+            return;
+        }
+        
+        // Cargar lista de países para el select
+        List<Country> countries = countryService.findAll();
+        
+        // Establecer atributos en el request
+        request.setAttribute("author", author);
+        request.setAttribute("countries", countries);
     }
 
     /**

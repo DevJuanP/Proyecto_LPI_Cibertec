@@ -2,7 +2,6 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDate;
 
 import core.BaseServlet;
 import jakarta.servlet.ServletException;
@@ -236,6 +235,7 @@ public class AuthorController extends BaseServlet {
         
         Author author = new Author();
         populateAuthorFromRequest(author, request);
+        
         author.setStatusId(statusService.getActiveStatusId());
         
         authorService.save(author);
@@ -259,6 +259,7 @@ public class AuthorController extends BaseServlet {
         }
         
         IAuthorService authorService = getService(IAuthorService.class);
+        IStatusService statusService = getService(IStatusService.class);
         
         Author author = authorService.findById(authorId);
         
@@ -269,6 +270,16 @@ public class AuthorController extends BaseServlet {
         }
         
         populateAuthorFromRequest(author, request);
+        
+        String statusName = request.getParameter("statusId");
+        if (statusName != null && !statusName.isEmpty()) {
+            if ("active".equalsIgnoreCase(statusName)) {
+                author.setStatusId(statusService.getActiveStatusId());
+            } else if ("inactive".equalsIgnoreCase(statusName)) {
+                author.setStatusId(statusService.getInactiveStatusId());
+            }
+        }
+        
         authorService.update(author);
         
         request.getSession().setAttribute("success", "Autor actualizado exitosamente");
@@ -316,11 +327,6 @@ public class AuthorController extends BaseServlet {
         String deathYearStr = request.getParameter("deathYear");
         if (deathYearStr != null && !deathYearStr.isEmpty()) {
             author.setDeathYear(Integer.parseInt(deathYearStr));
-        }
-        
-        String statusId = request.getParameter("statusId");
-        if (statusId != null && !statusId.isEmpty()) {
-            author.setStatusId(statusId);
         }
     }
 
