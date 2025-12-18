@@ -21,10 +21,7 @@ import util.SessionUtil;
  */
 @WebServlet("/author")
 public class AuthorController extends BaseServlet {
-    private static final long serialVersionUID = 1L;
-    
     private static final String ADMIN_PANEL = "/admin/panel?page=mantenimiento-autores";
-    private static final String LOGIN_PAGE = "/admin/login";
 
     @Override
     protected void doGetScoped(HttpServletRequest request, HttpServletResponse response) 
@@ -330,24 +327,5 @@ public class AuthorController extends BaseServlet {
         if (deathYearStr != null && !deathYearStr.isEmpty()) {
             author.setDeathYear(Integer.parseInt(deathYearStr));
         }
-    }
-
-    /**
-     * Retorna null si el string está vacío.
-     */
-    private String getStringOrNull(String value) {
-        return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
-    }
-
-    /**
-     * Escapa caracteres HTML para prevenir XSS.
-     */
-    private String escapeHtml(String text) {
-        if (text == null) return "";
-        return text.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#39;");
     }
 }

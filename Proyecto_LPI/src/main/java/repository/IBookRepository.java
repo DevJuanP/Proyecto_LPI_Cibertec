@@ -1,6 +1,7 @@
 package repository;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 import model.Book;
@@ -17,4 +18,9 @@ public interface IBookRepository {
     void update(Book book) throws SQLException, ClassNotFoundException;
     void delete(String bookId) throws SQLException, ClassNotFoundException;
     boolean existsByIsbn(String isbn) throws SQLException, ClassNotFoundException;
+    int count() throws SQLException, ClassNotFoundException;
+    int count(String search, String authorId, String categoryId, String bookStatusId) throws SQLException, ClassNotFoundException;
+    LinkedList<Book> findAllPaginated(int offset, int limit) throws SQLException, ClassNotFoundException;
+    LinkedList<Book> findAllPaginated(int offset, int limit, String search, String authorId, String categoryId, String bookStatusId)
+            throws SQLException, ClassNotFoundException;
 }

@@ -11,6 +11,8 @@ import java.io.IOException;
  */
 public abstract class BaseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    protected static final String LOGIN_PAGE = "/admin/login";
+    protected static final String ADMIN_PANEL = "/admin/panel";
     
     /**
      * Obtiene el contenedor de servicios
@@ -130,5 +132,24 @@ public abstract class BaseServlet extends HttpServlet {
         e.printStackTrace();
         
         redirectToError(request, response, "Error del servidor: " + e.getMessage());
+    }
+
+    /**
+     * Retorna null si el string está vacío.
+     */
+    protected String getStringOrNull(String value) {
+        return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
+    }
+
+    /**
+     * Escapa caracteres HTML para prevenir XSS.
+     */
+    protected String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
     }
 }

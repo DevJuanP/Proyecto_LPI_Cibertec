@@ -17,10 +17,7 @@ import util.SessionUtil;
  */
 @WebServlet("/admin/login")
 public class AdminLoginController extends BaseServlet {
-    private static final long serialVersionUID = 1L;
-    
-    private static final String LOGIN_JSP = "/admin/panel/admin-login.jsp";
-    private static final String ADMIN_PANEL = "/admin/panel";
+    private static final String LOGIN_JSP = "/admin/panel/admin-login.jsp";    
 
     @Override
     protected void doGetScoped(HttpServletRequest request, HttpServletResponse response) 

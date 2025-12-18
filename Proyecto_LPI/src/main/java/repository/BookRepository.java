@@ -9,6 +9,7 @@ import model.Country;
 import model.Status;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -467,6 +468,157 @@ public class BookRepository implements IBookRepository {
             }
             return false;
         }
+    }
+
+    @Override
+    public int count() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(*) FROM Book";
+
+        Connection conn = dbContext.getConnection();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public int count(String search, String authorId, String categoryId, String bookStatusId) throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Book b WHERE 1=1");
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (b.ISBN LIKE ? OR b.Title LIKE ?)");
+        }
+        if (authorId != null && !authorId.trim().isEmpty()) {
+            sql.append(" AND b.AuthorId = UUID_TO_BIN(?)");
+        }
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            sql.append(" AND b.CategoryId = UUID_TO_BIN(?)");
+        }
+        if (bookStatusId != null && !bookStatusId.trim().isEmpty()) {
+            sql.append(" AND b.BookStatusId = UUID_TO_BIN(?)");
+        }
+
+        Connection conn = dbContext.getConnection();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (authorId != null && !authorId.trim().isEmpty()) {
+                ps.setString(paramIndex++, authorId);
+            }
+            if (categoryId != null && !categoryId.trim().isEmpty()) {
+                ps.setString(paramIndex++, categoryId);
+            }
+            if (bookStatusId != null && !bookStatusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, bookStatusId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public LinkedList<Book> findAllPaginated(int offset, int limit) throws SQLException, ClassNotFoundException {
+        return findAllPaginated(offset, limit, null, null, null, null);
+    }
+
+    @Override
+    public LinkedList<Book> findAllPaginated(int offset, int limit, String search, String authorId, String categoryId, String bookStatusId)
+            throws SQLException, ClassNotFoundException {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT " +
+                     "BIN_TO_UUID(b.BookId) as BookId, b.ISBN, b.Title, " +
+                     "BIN_TO_UUID(b.AuthorId) as AuthorId, BIN_TO_UUID(b.CategoryId) as CategoryId, " +
+                     "b.PublicationYear, b.Publisher, b.Pages, b.Language, b.Description, " +
+                     "b.CoverImageUrl, BIN_TO_UUID(b.BookStatusId) as BookStatusId, " +
+                     "b.CreatedAt, b.UpdatedAt, " +
+                     // Author
+                     "BIN_TO_UUID(a.AuthorId) as AuthorIdFull, a.FullName, a.Pseudonym, " +
+                     "BIN_TO_UUID(a.CountryId) as AuthorCountryId, BIN_TO_UUID(a.StatusId) as AuthorStatusId, " +
+                     "a.Biography, a.BirthYear, a.DeathYear, a.Website, a.Email, a.PhotoUrl, " +
+                     "a.CreatedAt as AuthorCreatedAt, a.UpdatedAt as AuthorUpdatedAt, " +
+                     // Country
+                     "BIN_TO_UUID(c.CountryId) as CountryIdFull, c.CountryName, c.CountryCode, " +
+                     "c.CreatedAt as CountryCreatedAt, c.UpdatedAt as CountryUpdatedAt, " +
+                     // Status
+                     "BIN_TO_UUID(s.StatusId) as StatusIdFull, s.StatusName, " +
+                     "s.CreatedAt as StatusCreatedAt, s.UpdatedAt as StatusUpdatedAt, " +
+                     // Category
+                     "BIN_TO_UUID(cat.CategoryId) as CategoryIdFull, cat.CategoryName, cat.Description, " +
+                     "cat.CreatedAt as CategoryCreatedAt, cat.UpdatedAt as CategoryUpdatedAt, " +
+                     // BookStatus
+                     "BIN_TO_UUID(bs.BookStatusId) as BookStatusIdFull, bs.BookStatusName, " +
+                     "bs.CreatedAt as BookStatusCreatedAt, bs.UpdatedAt as BookStatusUpdatedAt " +
+                     "FROM Book b " +
+                     "INNER JOIN Author a ON b.AuthorId = a.AuthorId " +
+                     "INNER JOIN Country c ON a.CountryId = c.CountryId " +
+                     "INNER JOIN Status s ON a.StatusId = s.StatusId " +
+                     "INNER JOIN Category cat ON b.CategoryId = cat.CategoryId " +
+                     "INNER JOIN BookStatus bs ON b.BookStatusId = bs.BookStatusId " +
+                     "WHERE 1=1");
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (b.ISBN LIKE ? OR b.Title LIKE ?)");
+        }
+        if (authorId != null && !authorId.trim().isEmpty()) {
+            sql.append(" AND b.AuthorId = UUID_TO_BIN(?)");
+        }
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            sql.append(" AND b.CategoryId = UUID_TO_BIN(?)");
+        }
+        if (bookStatusId != null && !bookStatusId.trim().isEmpty()) {
+            sql.append(" AND b.BookStatusId = UUID_TO_BIN(?)");
+        }
+
+        sql.append(" ORDER BY b.Title ASC LIMIT ? OFFSET ?");
+
+        LinkedList<Book> books = new LinkedList<>();
+        Connection conn = dbContext.getConnection();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (authorId != null && !authorId.trim().isEmpty()) {
+                ps.setString(paramIndex++, authorId);
+            }
+            if (categoryId != null && !categoryId.trim().isEmpty()) {
+                ps.setString(paramIndex++, categoryId);
+            }
+            if (bookStatusId != null && !bookStatusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, bookStatusId);
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    books.add(mapResultSetToBook(rs));
+                }
+            }
+        }
+        return books;
     }
 
     private Book mapResultSetToBook(ResultSet rs) throws SQLException {

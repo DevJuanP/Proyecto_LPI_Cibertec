@@ -82,6 +82,11 @@ public class AuthorService implements IAuthorService {
         authorRepository.delete(authorId);
     }
 
+    @Override
+    public ArrayList<Author> findAll() throws SQLException, ClassNotFoundException {
+        return new ArrayList<>(authorRepository.findAll());
+    }
+
     /**
      * Mapea un Author a AuthorData DTO.
      */

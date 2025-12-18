@@ -107,6 +107,9 @@
                 case "edit-autor":
                     contentPage = "items/edit-autor.jsp";
                     break;
+                case "edit-libro":
+                    contentPage = "items/edit-libro.jsp";
+                    break;
                 default:
                     contentPage = "items/dashboard.jsp";
             }

@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import core.BaseServlet;
@@ -12,9 +13,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Author;
+import model.Book;
+import model.BookStatus;
+import model.Category;
 import model.Country;
 import model.Status;
 import service.IAuthorService;
+import service.IBookService;
+import service.IBookStatusService;
+import service.ICategoryService;
 import service.ICountryService;
 import service.IStatusService;
 import util.SessionUtil;
@@ -28,7 +35,6 @@ public class AdminPanelController extends BaseServlet {
     private static final long serialVersionUID = 1L;
     
     private static final String PANEL_JSP = "/admin/panel/index.jsp";
-    private static final String LOGIN_PAGE = "/admin/login";
     
     private static final int DEFAULT_PAGE_SIZE = 15;
 
@@ -57,9 +63,9 @@ public class AdminPanelController extends BaseServlet {
                 case "mantenimiento-libros":
                     loadBooksData(request);
                     break;
-                /*case "edit-libro":
-                    loadEditLibroData(request);
-                    break;*/
+                case "edit-libro":
+                    loadEditBookData(request);
+                    break;
                 case "libros-alquiler":
                     loadRentalsData(request);
                     break;
@@ -149,8 +155,73 @@ public class AdminPanelController extends BaseServlet {
     /**
      * Carga los datos para la página de mantenimiento de libros.
      */
-    private void loadBooksData(HttpServletRequest request) {
-        // TODO: Implementar cuando exista BookService
+    private void loadBooksData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        IBookService bookService = getService(IBookService.class);
+        IAuthorService authorService = getService(IAuthorService.class);
+        IBookStatusService bookStatusService = getService(IBookStatusService.class);
+        ICategoryService categoryService = getService(ICategoryService.class);
+        
+        int currentPage = getIntParameter(request, "p", 1);
+        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        String search = request.getParameter("search");
+        String authorId = request.getParameter("authorId");
+        String bookStatusId = request.getParameter("bookStatusId");
+        String categoryId = request.getParameter("categoryId");
+        
+        PagedResult<Book> booksResult = bookService.getRegisteredBooks(
+            currentPage, pageSize, search, authorId, categoryId, bookStatusId);
+        
+        ArrayList<Author> authors = authorService.findAll();
+        ArrayList<BookStatus> bookStatuses = bookStatusService.findAll();
+        List<Category> categories = categoryService.findAll();
+        int activeBooksCount = bookService.getActiveBooksCount();
+        
+        request.setAttribute("booksResult", booksResult);
+        request.setAttribute("activeBooksCount", activeBooksCount);
+        request.setAttribute("authors", authors);
+        request.setAttribute("bookStatuses", bookStatuses);
+        request.setAttribute("categories", categories);
+        request.setAttribute("totalBooks", bookService.getTotalBooksCount());
+        
+        request.setAttribute("searchValue", search != null ? search : "");
+        request.setAttribute("authorIdValue", authorId != null ? authorId : "");
+        request.setAttribute("categoryIdValue", categoryId != null ? categoryId : "");
+        request.setAttribute("bookStatusIdValue", bookStatusId != null ? bookStatusId : "");
+    }
+
+    /**
+     * Carga los datos para la página de edición de libro.
+     */
+    private void loadEditBookData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        String bookId = request.getParameter("id");
+        
+        if (bookId == null || bookId.isEmpty()) {
+            request.getSession().setAttribute("error", "ID de libro requerido");
+            request.setAttribute("page", "mantenimiento-libros");
+            return;
+        }
+        
+        IBookService bookService = getService(IBookService.class);
+        IAuthorService authorService = getService(IAuthorService.class);
+        IBookStatusService bookStatusService = getService(IBookStatusService.class);
+        ICategoryService categoryService = getService(ICategoryService.class);
+        
+        Book book = bookService.findById(bookId);
+        
+        if (book == null) {
+            request.getSession().setAttribute("error", "Libro no encontrado");
+            request.setAttribute("page", "mantenimiento-libros");
+            return;
+        }
+        
+        List<Author> authors = authorService.findAll();
+        List<BookStatus> bookStatuses = bookStatusService.findAll();
+        List<Category> categories = categoryService.findAll();
+        
+        request.setAttribute("libro", book);
+        request.setAttribute("authors", authors);
+        request.setAttribute("bookStatuses", bookStatuses);
+        request.setAttribute("categories", categories);
     }
 
     /**
