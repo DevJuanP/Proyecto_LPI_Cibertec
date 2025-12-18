@@ -57,6 +57,9 @@ public class AdminPanelController extends BaseServlet {
                 case "mantenimiento-libros":
                     loadBooksData(request);
                     break;
+                /*case "edit-libro":
+                    loadEditLibroData(request);
+                    break;*/
                 case "libros-alquiler":
                     loadRentalsData(request);
                     break;
@@ -99,8 +102,10 @@ public class AdminPanelController extends BaseServlet {
         
         List<Country> countries = countryService.findAll();
         List<Status> statuses = statusService.findAll();
+        int activeAuthorsCount = authorService.getActiveAuthorsCount();
         
         request.setAttribute("authorsResult", authorsResult);
+        request.setAttribute("activeAuthorsCount", activeAuthorsCount);
         request.setAttribute("countries", countries);
         request.setAttribute("statuses", statuses);
         request.setAttribute("totalAuthors", authorService.getTotalAuthorsCount());

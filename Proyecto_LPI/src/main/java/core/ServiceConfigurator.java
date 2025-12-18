@@ -24,8 +24,14 @@ import repository.RentalStatusRepository;
 import repository.StatusRepository;
 import repository.UserRepository;
 import service.AuthorService;
+import service.BookService;
+import service.BookStatusService;
+import service.CategoryService;
 import service.CountryService;
 import service.IAuthorService;
+import service.IBookService;
+import service.IBookStatusService;
+import service.ICategoryService;
 import service.ICountryService;
 import service.IStatusService;
 import service.IUserService;
@@ -89,6 +95,9 @@ public class ServiceConfigurator {
         container.addScoped(IAuthorService.class, AuthorService.class);
         container.addScoped(ICountryService.class, CountryService.class);
         container.addScoped(IStatusService.class, StatusService.class);
+        container.addScoped(IBookService.class, BookService.class);
+        container.addScoped(IBookStatusService.class, BookStatusService.class);
+        container.addScoped(ICategoryService.class, CategoryService.class);
 
         System.out.println("✓ Servicios de negocio configurados");
     }

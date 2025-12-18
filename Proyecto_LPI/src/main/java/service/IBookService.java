@@ -1,6 +1,5 @@
-/*package service;
+package service;
 
 public interface IBookService {
     
 }
-*/

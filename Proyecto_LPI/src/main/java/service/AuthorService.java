@@ -8,14 +8,18 @@ import java.util.List;
 import dto.author.AuthorData;
 import dto.shared.PagedResult;
 import model.Author;
+import model.Status;
 import repository.IAuthorRepository;
+import repository.IStatusRepository;
 import util.DateUtil;
 
 public class AuthorService implements IAuthorService {
     private final IAuthorRepository authorRepository;
+    private final IStatusRepository statusRepository;
 
-    public AuthorService(IAuthorRepository authorRepository) {
+    public AuthorService(IAuthorRepository authorRepository, IStatusRepository statusRepository) {
         this.authorRepository = authorRepository;
+        this.statusRepository = statusRepository;
     }
 
     @Override
@@ -49,6 +53,13 @@ public class AuthorService implements IAuthorService {
     public int getAuthorsWithBooksCount() throws SQLException, ClassNotFoundException {
         // TODO: Implementar luego
         return 0;
+    }
+
+    @Override
+    public int getActiveAuthorsCount() throws SQLException, ClassNotFoundException {
+        Status activeStatus = statusRepository.findByName("Active");
+
+        return authorRepository.count(null, null, activeStatus.getStatusId());
     }
 
     @Override

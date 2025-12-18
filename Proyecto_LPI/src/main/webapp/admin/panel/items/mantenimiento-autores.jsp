@@ -54,7 +54,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <small class="text-muted">Activos</small>
-                        <h4 class="mb-0">${authorsResult.totalItems}</h4>
+                        <h4 class="mb-0">${activeAuthorsCount}</h4>
                     </div>
                     <i class="bi bi-flag-fill fs-2 text-info"></i>
                 </div>
