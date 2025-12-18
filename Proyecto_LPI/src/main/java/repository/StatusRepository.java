@@ -4,7 +4,6 @@ import connection.DbContext;
 import model.Status;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class StatusRepository implements IStatusRepository {
     private final DbContext dbContext;
@@ -56,13 +55,13 @@ public class StatusRepository implements IStatusRepository {
     }
 
     @Override
-    public List<Status> findAll() throws SQLException, ClassNotFoundException {
+    public ArrayList<Status> findAll() throws SQLException, ClassNotFoundException {
         String sql = "SELECT BIN_TO_UUID(StatusId) as StatusId, StatusName, " +
                      "CreatedAt, UpdatedAt " +
                      "FROM Status " +
                      "ORDER BY StatusName ASC";
         
-        List<Status> statuses = new ArrayList<>();
+        ArrayList<Status> statuses = new ArrayList<>(2);
         Connection conn = dbContext.getConnection();
         
         try (PreparedStatement ps = conn.prepareStatement(sql);

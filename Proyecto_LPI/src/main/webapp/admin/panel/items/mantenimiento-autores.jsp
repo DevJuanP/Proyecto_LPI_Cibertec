@@ -106,8 +106,12 @@
                     <label class="form-label">Estado</label>
                     <select name="statusId" class="form-select">
                         <option value="">Todos</option>
-                        <option value="active" ${statusIdValue == 'active' ? 'selected' : ''}>Activo</option>
-                        <option value="inactive" ${statusIdValue == 'inactive' ? 'selected' : ''}>Inactivo</option>
+                        <c:forEach var="status" items="${statuses}">
+                            <option value="${status.statusId}" 
+                                ${status.statusId == statusIdValue ? 'selected' : ''}>
+                                ${status.statusName}
+                            </option>
+                        </c:forEach>
                     </select>
                 </div>
                 <div class="col-md-2">

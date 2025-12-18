@@ -1,7 +1,9 @@
 package service;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
+import model.Status;
 import repository.IStatusRepository;
 
 public class StatusService implements IStatusService {
@@ -17,5 +19,9 @@ public class StatusService implements IStatusService {
 
     public String getInactiveStatusId() throws SQLException, ClassNotFoundException {
         return statusRepository.findByName("Inactive").getStatusId();
+    }
+
+    public ArrayList<Status> findAll() throws SQLException, ClassNotFoundException {
+        return statusRepository.findAll();
     }
 }

@@ -209,6 +209,7 @@ public class AuthorController extends BaseServlet {
         }
         
         IAuthorService authorService = getService(IAuthorService.class);
+        IStatusService statusService = getService(IStatusService.class);
         ICountryService countryService = getService(ICountryService.class);
         
         Author author = authorService.findById(authorId);
@@ -221,6 +222,7 @@ public class AuthorController extends BaseServlet {
         
         request.setAttribute("author", author);
         request.setAttribute("countries", countryService.findAll());
+        request.setAttribute("statuses", statusService.findAll());
         request.getRequestDispatcher("/admin/panel/items/edit-autor.jsp").forward(request, response);
     }
 

@@ -13,8 +13,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Author;
 import model.Country;
+import model.Status;
 import service.IAuthorService;
 import service.ICountryService;
+import service.IStatusService;
 import util.SessionUtil;
 
 /**
@@ -84,6 +86,7 @@ public class AdminPanelController extends BaseServlet {
     private void loadAuthorsData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         IAuthorService authorService = getService(IAuthorService.class);
         ICountryService countryService = getService(ICountryService.class);
+        IStatusService statusService = getService(IStatusService.class);
         
         int currentPage = getIntParameter(request, "p", 1);
         int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
@@ -95,9 +98,11 @@ public class AdminPanelController extends BaseServlet {
             currentPage, pageSize, search, countryId, statusId);
         
         List<Country> countries = countryService.findAll();
+        List<Status> statuses = statusService.findAll();
         
         request.setAttribute("authorsResult", authorsResult);
         request.setAttribute("countries", countries);
+        request.setAttribute("statuses", statuses);
         request.setAttribute("totalAuthors", authorService.getTotalAuthorsCount());
         
         request.setAttribute("searchValue", search != null ? search : "");
