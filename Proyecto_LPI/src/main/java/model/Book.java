@@ -171,6 +171,19 @@ public class Book {
         this.bookStatus = bookStatus;
     }
 
+    public String getPublicationYearString() {
+        if (publicationYear == null) {
+            return "-";
+        }
+
+        if (publicationYear <= 0) {
+            int bcYear = -publicationYear + 1;
+            return bcYear + " a.C.";
+        } else {
+            return String.valueOf(publicationYear);
+        }
+    }
+
     @Override
     public String toString() {
         return title;

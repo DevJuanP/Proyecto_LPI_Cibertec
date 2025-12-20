@@ -152,7 +152,6 @@
                                    name="publicationYear" 
                                    value="${libro.publicationYear}"
                                    placeholder="2024"
-                                   min="1" 
                                    max="2100"
                                    step="1">
                             <div class="form-text">Año de la publicación del libro</div>

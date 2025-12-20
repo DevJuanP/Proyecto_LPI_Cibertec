@@ -10,4 +10,5 @@ INSERT INTO Category (CategoryId, CategoryName, Description) VALUES
 (UUID_TO_BIN(UUID()), 'Ciencia Ficción', 'Ficción científica'),
 (UUID_TO_BIN(UUID()), 'Filosofía', 'Obras de filosofía'),
 (UUID_TO_BIN(UUID()), 'Filosofía política', 'Obras de filosofía política'),
-(UUID_TO_BIN(UUID()), 'Histórico', 'Novelas y textos históricos');
+(UUID_TO_BIN(UUID()), 'Histórico', 'Novelas y textos históricos'),
+(UUID_TO_BIN(UUID()), 'Economía', 'Libros de economía');

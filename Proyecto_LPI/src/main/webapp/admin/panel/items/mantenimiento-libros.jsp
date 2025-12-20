@@ -254,16 +254,7 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty book.publicationYear}">
-                                                ${book.publicationYear}
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="text-muted">-</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
+                                    <td>${book.publicationYearString}</td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${not empty book.category}">
@@ -277,10 +268,10 @@
                                     <td>
                                         <c:choose>
                                             <c:when test="${book.bookStatus.bookStatusName == 'Activo'}">
-                                                <span class="badge bg-success">Disponible</span>
+                                                <span class="badge bg-success">Activo</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="badge bg-secondary">No Disponible</span>
+                                                <span class="badge bg-secondary">Inactivo</span>
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
@@ -403,8 +394,8 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Categoría</label>
-                            <select name="categoryId" class="form-select">
+                            <label class="form-label">Categoría *</label>
+                            <select name="categoryId" class="form-select" required>
                                 <option value="">Seleccionar categoría...</option>
                                 <c:forEach var="category" items="${categories}">
                                     <option value="${category.categoryId}">${category.categoryName}</option>
@@ -419,7 +410,7 @@
                         <div class="col-md-3">
                             <label class="form-label">Año de Publicación</label>
                             <input type="number" name="publicationYear" class="form-control" 
-                                   placeholder="2024" min="1" max="2100">
+                                   placeholder="2024" max="2100">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Páginas</label>
