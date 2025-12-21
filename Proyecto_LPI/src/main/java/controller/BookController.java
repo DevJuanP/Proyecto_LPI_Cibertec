@@ -152,7 +152,7 @@ public class BookController extends BaseServlet {
         
         out.println("      <tr>");
         out.println("        <th>Año de Publicación:</th>");
-        out.println("        <td>" + (book.getPublicationYear() != null ? book.getPublicationYear() : "-") + "</td>");
+        out.println("        <td>" + (book.getPublicationYearString()) + "</td>");
         out.println("      </tr>");
         
         out.println("      <tr>");
