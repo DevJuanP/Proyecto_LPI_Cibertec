@@ -222,10 +222,11 @@
                     <div class="col-md-8">
                         <select name="roleId" class="form-select" required>
                             <option value="">Seleccionar rol...</option>
-                            <!-- Aquí deberías cargar los roles disponibles desde el servidor -->
-                            <!-- Por ahora, valores hardcoded basados en los datos del proyecto -->
-                            <option value="admin-role-id">Admin</option>
-                            <option value="user-role-id">User</option>
+                            <c:forEach var="role" items="${roles}">
+                                <option value="${role.roleId}" >
+                                    ${role.roleName}
+                                </option>
+                            </c:forEach>
                         </select>
                     </div>
                     <div class="col-md-4">

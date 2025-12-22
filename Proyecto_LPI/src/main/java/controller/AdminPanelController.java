@@ -18,6 +18,7 @@ import model.Book;
 import model.BookStatus;
 import model.Category;
 import model.Country;
+import model.Role;
 import model.Status;
 import model.User;
 import service.IAuthorService;
@@ -25,6 +26,7 @@ import service.IBookService;
 import service.IBookStatusService;
 import service.ICategoryService;
 import service.ICountryService;
+import service.IRoleService;
 import service.IStatusService;
 import service.IUserService;
 import util.SessionUtil;
@@ -268,6 +270,7 @@ public class AdminPanelController extends BaseServlet {
         
         IUserService userService = getService(IUserService.class);
         IStatusService statusService = getService(IStatusService.class);
+        IRoleService roleService = getService(IRoleService.class);
         
         User user = userService.getUserById(userId);
         
@@ -277,10 +280,12 @@ public class AdminPanelController extends BaseServlet {
             return;
         }
         
-        List<Status> statuses = statusService.findAll();
+        ArrayList<Status> statuses = statusService.findAll();
+        List<Role> roles =  roleService.findAll();
         
         request.setAttribute("user", user);
         request.setAttribute("statuses", statuses);
+        request.setAttribute("roles", roles);
     }
 
     /**

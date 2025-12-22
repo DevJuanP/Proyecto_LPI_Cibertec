@@ -17,10 +17,12 @@ import repository.ICategoryRepository;
 import repository.ICountryRepository;
 import repository.IRentalRepository;
 import repository.IRentalStatusRepository;
+import repository.IRoleRepository;
 import repository.IStatusRepository;
 import repository.IUserRepository;
 import repository.RentalRepository;
 import repository.RentalStatusRepository;
+import repository.RoleRepository;
 import repository.StatusRepository;
 import repository.UserRepository;
 import service.AuthorService;
@@ -33,8 +35,10 @@ import service.IBookService;
 import service.IBookStatusService;
 import service.ICategoryService;
 import service.ICountryService;
+import service.IRoleService;
 import service.IStatusService;
 import service.IUserService;
+import service.RoleService;
 import service.StatusService;
 import service.UserService;
 
@@ -83,6 +87,7 @@ public class ServiceConfigurator {
         container.addScoped(IRentalRepository.class, RentalRepository.class);
         container.addScoped(IRentalStatusRepository.class, RentalStatusRepository.class);
         container.addScoped(IStatusRepository.class, StatusRepository.class);
+        container.addScoped(IRoleRepository.class, RoleRepository.class);
         
         System.out.println("✓ Repositorios configurados");
     }
@@ -98,6 +103,7 @@ public class ServiceConfigurator {
         container.addScoped(IBookService.class, BookService.class);
         container.addScoped(IBookStatusService.class, BookStatusService.class);
         container.addScoped(ICategoryService.class, CategoryService.class);
+        container.addScoped(IRoleService.class, RoleService.class);
 
         System.out.println("✓ Servicios de negocio configurados");
     }
