@@ -6,6 +6,7 @@ import model.Role;
 import model.Status;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -207,6 +208,128 @@ public class UserRepository implements IUserRepository {
             
             ps.executeUpdate();
         }
+    }
+
+    @Override
+    public int count() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(*) FROM User";
+        Connection conn = dbContext.getConnection();
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public int count(String search, String roleId, String statusId) throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(DISTINCT u.UserId) FROM User u ");
+        
+        if (roleId != null && !roleId.trim().isEmpty()) {
+            sql.append("INNER JOIN UserRole ur ON u.UserId = ur.UserId ");
+        }
+        
+        sql.append("WHERE 1=1");
+        
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND u.Email LIKE ?");
+        }
+        if (roleId != null && !roleId.trim().isEmpty()) {
+            sql.append(" AND ur.RoleId = UUID_TO_BIN(?)");
+        }
+        if (statusId != null && !statusId.trim().isEmpty()) {
+            sql.append(" AND u.StatusId = UUID_TO_BIN(?)");
+        }
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + search.trim() + "%");
+            }
+            if (roleId != null && !roleId.trim().isEmpty()) {
+                ps.setString(paramIndex++, roleId);
+            }
+            if (statusId != null && !statusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, statusId);
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public LinkedList<User> findAllPaginated(int offset, int limit) throws SQLException, ClassNotFoundException {
+        return findAllPaginated(offset, limit, null, null, null);
+    }
+
+    @Override
+    public LinkedList<User> findAllPaginated(int offset, int limit, String search, String roleId, String statusId) 
+            throws SQLException, ClassNotFoundException {
+        
+        StringBuilder sql = new StringBuilder(
+            "SELECT DISTINCT BIN_TO_UUID(u.UserId) as UserId, u.Email, u.Password, " +
+            "BIN_TO_UUID(u.StatusId) as StatusId, u.CreatedAt, u.UpdatedAt, " +
+            "BIN_TO_UUID(s.StatusId) as StatusIdFull, s.StatusName, " +
+            "s.CreatedAt as StatusCreatedAt, s.UpdatedAt as StatusUpdatedAt " +
+            "FROM User u " +
+            "INNER JOIN Status s ON u.StatusId = s.StatusId ");
+        
+        if (roleId != null && !roleId.trim().isEmpty()) {
+            sql.append("INNER JOIN UserRole ur ON u.UserId = ur.UserId ");
+        }
+        
+        sql.append("WHERE 1=1");
+        
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND u.Email LIKE ?");
+        }
+        if (roleId != null && !roleId.trim().isEmpty()) {
+            sql.append(" AND ur.RoleId = UUID_TO_BIN(?)");
+        }
+        if (statusId != null && !statusId.trim().isEmpty()) {
+            sql.append(" AND u.StatusId = UUID_TO_BIN(?)");
+        }
+        
+        sql.append(" ORDER BY u.CreatedAt DESC LIMIT ? OFFSET ?");
+        
+        LinkedList<User> users = new LinkedList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + search.trim() + "%");
+            }
+            if (roleId != null && !roleId.trim().isEmpty()) {
+                ps.setString(paramIndex++, roleId);
+            }
+            if (statusId != null && !statusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, statusId);
+            }
+            
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex, offset);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    User user = mapResultSetToUser(rs);
+                    user.setRoles(findRolesByUserId(user.getUserId()));
+                    users.add(user);
+                }
+            }
+        }
+        return users;
     }
 
     private User mapResultSetToUser(ResultSet rs) throws SQLException {

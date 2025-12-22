@@ -8,6 +8,7 @@ import java.util.List;
 import core.BaseServlet;
 import dto.author.AuthorData;
 import dto.shared.PagedResult;
+import dto.user.UserData;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,12 +19,14 @@ import model.BookStatus;
 import model.Category;
 import model.Country;
 import model.Status;
+import model.User;
 import service.IAuthorService;
 import service.IBookService;
 import service.IBookStatusService;
 import service.ICategoryService;
 import service.ICountryService;
 import service.IStatusService;
+import service.IUserService;
 import util.SessionUtil;
 
 /**
@@ -74,6 +77,12 @@ public class AdminPanelController extends BaseServlet {
                     break;
                 case "autores-pedidos":
                     loadMostRequestedAuthorsData(request);
+                    break;
+                case "mantenimiento-usuarios":
+                    loadUsersData(request);
+                    break;
+                case "edit-usuario":
+                    loadEditUserData(request);
                     break;
                 case "dashboard":
                 default:
@@ -144,10 +153,8 @@ public class AdminPanelController extends BaseServlet {
             return;
         }
         
-        // Cargar lista de países para el select
         List<Country> countries = countryService.findAll();
         
-        // Establecer atributos en el request
         request.setAttribute("author", author);
         request.setAttribute("countries", countries);
     }
@@ -214,14 +221,66 @@ public class AdminPanelController extends BaseServlet {
             return;
         }
         
-        List<Author> authors = authorService.findAll();
-        List<BookStatus> bookStatuses = bookStatusService.findAll();
+        ArrayList<Author> authors = authorService.findAll();
+        ArrayList<BookStatus> bookStatuses = bookStatusService.findAll();
         List<Category> categories = categoryService.findAll();
         
         request.setAttribute("libro", book);
         request.setAttribute("authors", authors);
         request.setAttribute("bookStatuses", bookStatuses);
         request.setAttribute("categories", categories);
+    }
+
+    private void loadUsersData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        IUserService userService = getService(IUserService.class);
+        IStatusService statusService = getService(IStatusService.class);
+        
+        int currentPage = getIntParameter(request, "p", 1);
+        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        String search = request.getParameter("search");
+        String roleId = request.getParameter("roleId");
+        String statusId = request.getParameter("statusId");
+        
+        PagedResult<UserData> usersResult = userService.getRegisteredUsers(
+            currentPage, pageSize, search, roleId, statusId);
+        
+        List<Status> statuses = statusService.findAll();
+        int activeUsersCount = userService.getActiveUsersCount();
+        
+        request.setAttribute("usersResult", usersResult);
+        request.setAttribute("activeUsersCount", activeUsersCount);
+        request.setAttribute("statuses", statuses);
+        request.setAttribute("totalUsers", userService.getTotalUsersCount());
+        
+        request.setAttribute("searchValue", search != null ? search : "");
+        request.setAttribute("roleIdValue", roleId != null ? roleId : "");
+        request.setAttribute("statusIdValue", statusId != null ? statusId : "");
+    }
+
+    private void loadEditUserData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        String userId = request.getParameter("id");
+        
+        if (userId == null || userId.isEmpty()) {
+            request.getSession().setAttribute("error", "ID de usuario requerido");
+            request.setAttribute("page", "mantenimiento-usuarios");
+            return;
+        }
+        
+        IUserService userService = getService(IUserService.class);
+        IStatusService statusService = getService(IStatusService.class);
+        
+        User user = userService.getUserById(userId);
+        
+        if (user == null) {
+            request.getSession().setAttribute("error", "Usuario no encontrado");
+            request.setAttribute("page", "mantenimiento-usuarios");
+            return;
+        }
+        
+        List<Status> statuses = statusService.findAll();
+        
+        request.setAttribute("user", user);
+        request.setAttribute("statuses", statuses);
     }
 
     /**

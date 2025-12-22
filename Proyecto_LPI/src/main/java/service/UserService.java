@@ -4,9 +4,16 @@ import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
 
 import model.User;
+import repository.IStatusRepository;
 import repository.IUserRepository;
 import util.PasswordUtil;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import dto.shared.PagedResult;
+import dto.user.UserData;
 
 /**
  * Implementación del servicio de usuarios.
@@ -15,9 +22,11 @@ import java.util.List;
 public class UserService implements IUserService {
     
     private final IUserRepository userRepository;
+    private final IStatusRepository statusRepository;
     
-    public UserService(IUserRepository userRepository) {
+    public UserService(IUserRepository userRepository, IStatusRepository statusRepository) {
         this.userRepository = userRepository;
+        this.statusRepository = statusRepository;
     }
     
     @Override
@@ -173,5 +182,56 @@ public class UserService implements IUserService {
         
         return user.getRoles().stream()
             .anyMatch(role -> roleName.equalsIgnoreCase(role.getRoleName()));
+    }
+
+    @Override
+    public PagedResult<UserData> getRegisteredUsers(int page, int pageSize, String search, 
+            String roleId, String statusId) throws SQLException, ClassNotFoundException {
+        
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 100) pageSize = 100;
+        
+        int offset = (page - 1) * pageSize;
+        
+        int totalItems = userRepository.count(search, roleId, statusId);
+        
+        LinkedList<User> users = userRepository.findAllPaginated(offset, pageSize, search, roleId, statusId);
+        
+        List<UserData> userDataList = new ArrayList<>(users.size());
+        for (User user : users) {
+            userDataList.add(mapToUserData(user));
+        }
+        
+        return new PagedResult<>(userDataList, page, pageSize, totalItems);
+    }
+
+    @Override
+    public int getTotalUsersCount() throws SQLException, ClassNotFoundException {
+        return userRepository.count();
+    }
+
+    @Override
+    public int getActiveUsersCount() throws SQLException, ClassNotFoundException {
+        String activeStatusId = statusRepository.findByName("Active").getStatusId();
+
+        return userRepository.count(null, null, activeStatusId);
+    }
+
+    private UserData mapToUserData(User user) {
+        ArrayList<String> roleNames = new ArrayList<>(2);
+        if (user.getRoles() != null) {
+            user.getRoles().forEach(role -> roleNames.add(role.getRoleName()));
+        }
+        
+        return new UserData(
+            user.getUserId(),
+            user.getEmail(),
+            user.getCreatedAt(),
+            user.getUpdatedAt(),
+            user.getStatusId(),
+            user.getStatus() != null ? user.getStatus().getStatusName() : null,
+            roleNames
+        );
     }
 }

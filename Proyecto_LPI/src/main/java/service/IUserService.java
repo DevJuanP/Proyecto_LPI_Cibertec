@@ -4,6 +4,8 @@ import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
 import java.util.List;
 
+import dto.shared.PagedResult;
+import dto.user.UserData;
 import model.User;
 
 public interface IUserService {
@@ -20,4 +22,7 @@ public interface IUserService {
     void assignRole(String userId, String roleId) throws SQLException, ClassNotFoundException;
     void removeRole(String userId, String roleId) throws SQLException, ClassNotFoundException;
     boolean hasRole(String userId, String roleName) throws SQLException, ClassNotFoundException;
+    public PagedResult<UserData> getRegisteredUsers(int page, int pageSize, String search, String roleId, String statusId) throws SQLException, ClassNotFoundException;
+    int getTotalUsersCount() throws SQLException, ClassNotFoundException;
+    int getActiveUsersCount() throws SQLException, ClassNotFoundException;
 }

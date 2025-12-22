@@ -64,9 +64,9 @@
                 <small class="text-white-50 text-uppercase fw-bold">Sistema</small>
             </div>
             
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="?page=mantenimiento-usuarios">
                 <i class="bi bi-people"></i>
-                <span>Usuarios</span>
+                <span>Gestión de Usuarios</span>
             </a>
             
             <a class="nav-link" href="#">
@@ -104,11 +104,17 @@
                 case "mantenimiento-autores":
                     contentPage = "items/mantenimiento-autores.jsp";
                     break;
+                case "mantenimiento-usuarios":
+                    contentPage = "items/mantenimiento-usuarios.jsp";
+                    break;
                 case "edit-autor":
                     contentPage = "items/edit-autor.jsp";
                     break;
                 case "edit-libro":
                     contentPage = "items/edit-libro.jsp";
+                    break;
+                case "edit-usuario":
+                    contentPage = "items/edit-usuario.jsp";
                     break;
                 default:
                     contentPage = "items/dashboard.jsp";

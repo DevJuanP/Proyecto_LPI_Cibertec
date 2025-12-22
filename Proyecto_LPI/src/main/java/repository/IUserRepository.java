@@ -1,6 +1,7 @@
 package repository;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 import model.Role;
@@ -17,4 +18,8 @@ public interface IUserRepository {
     List<Role> findRolesByUserId(String userId) throws SQLException, ClassNotFoundException;
     void addRoleToUser(String userId, String roleId) throws SQLException, ClassNotFoundException;
     void removeRoleFromUser(String userId, String roleId) throws SQLException, ClassNotFoundException;
+    int count() throws SQLException, ClassNotFoundException;
+    int count(String search, String roleId, String statusId) throws SQLException, ClassNotFoundException;
+    LinkedList<User> findAllPaginated(int offset, int limit) throws SQLException, ClassNotFoundException;
+    LinkedList<User> findAllPaginated(int offset, int limit, String search, String roleId, String statusId) throws SQLException, ClassNotFoundException;
 }
