@@ -305,7 +305,7 @@
                 <table class="table table-sm table-borderless mb-0">
                     <tr>
                         <th style="width: 40%">ID:</th>
-                        <td><code class="small">${fn:substring(libro.bookId, 0, 8)}...</code></td>
+                        <td><code class="small">${libro.bookId}</code></td>
                     </tr>
                     <tr>
                         <th>ISBN:</th>

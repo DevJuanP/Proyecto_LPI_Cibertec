@@ -236,6 +236,7 @@ public class AdminPanelController extends BaseServlet {
     private void loadUsersData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         IUserService userService = getService(IUserService.class);
         IStatusService statusService = getService(IStatusService.class);
+        IRoleService roleService = getService(IRoleService.class);
         
         int currentPage = getIntParameter(request, "p", 1);
         int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
@@ -247,11 +248,13 @@ public class AdminPanelController extends BaseServlet {
             currentPage, pageSize, search, roleId, statusId);
         
         List<Status> statuses = statusService.findAll();
+        List<Role> roles =  roleService.findAll();
         int activeUsersCount = userService.getActiveUsersCount();
         
         request.setAttribute("usersResult", usersResult);
         request.setAttribute("activeUsersCount", activeUsersCount);
         request.setAttribute("statuses", statuses);
+        request.setAttribute("roles", roles);
         request.setAttribute("totalUsers", userService.getTotalUsersCount());
         
         request.setAttribute("searchValue", search != null ? search : "");

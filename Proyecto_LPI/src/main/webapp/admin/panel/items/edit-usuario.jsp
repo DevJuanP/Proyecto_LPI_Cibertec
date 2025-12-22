@@ -271,7 +271,7 @@
                 <table class="table table-sm table-borderless mb-0">
                     <tr>
                         <th style="width: 40%">ID:</th>
-                        <td><code class="small">${fn:substring(user.userId, 0, 8)}...</code></td>
+                        <td><code class="small">${user.userId}</code></td>
                     </tr>
                     <tr>
                         <th>Creado:</th>

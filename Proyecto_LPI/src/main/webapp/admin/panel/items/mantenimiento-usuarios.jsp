@@ -87,13 +87,25 @@
         <form method="get" action="${pageContext.request.contextPath}/admin/panel">
             <input type="hidden" name="page" value="mantenimiento-usuarios">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="form-label">Buscar</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                         <input type="text" name="search" class="form-control" 
                                placeholder="Email del usuario..." value="${searchValue}">
                     </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Rol</label>
+                    <select name="roleId" class="form-select">
+                        <option value="">Todos</option>
+                        <c:forEach var="role" items="${roles}">
+                            <option value="${role.roleId}" 
+                                ${role.roleId == roleIdValue ? 'selected' : ''}>
+                                ${role.roleName}
+                            </option>
+                        </c:forEach>
+                    </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Estado</label>
@@ -107,7 +119,7 @@
                         </c:forEach>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary">
@@ -193,7 +205,7 @@
                                             <div>
                                                 <strong>${user.email}</strong>
                                                 <br>
-                                                <small class="text-muted">ID: ${fn:substring(user.userId, 0, 8)}...</small>
+                                                <small class="text-muted">ID: ${user.userId}</small>
                                             </div>
                                         </div>
                                     </td>

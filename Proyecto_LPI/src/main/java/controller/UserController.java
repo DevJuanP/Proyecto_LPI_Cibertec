@@ -144,7 +144,7 @@ public class UserController extends BaseServlet {
         
         out.println("      <tr>");
         out.println("        <th style=\"width: 40%\">ID:</th>");
-        out.println("        <td><code class=\"small\">" + escapeHtml(user.getUserId().substring(0, Math.min(8, user.getUserId().length()))) + "...</code></td>");
+        out.println("        <td><code class=\"small\">" + escapeHtml(user.getUserId()) + "</code></td>");
         out.println("      </tr>");
         
         out.println("      <tr>");
