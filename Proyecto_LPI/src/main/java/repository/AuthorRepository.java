@@ -1,12 +1,17 @@
 package repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.LinkedList;
+import java.util.UUID;
+
 import connection.DbContext;
 import model.Author;
 import model.Country;
 import model.Status;
-import java.sql.*;
-import java.util.LinkedList;
-import java.util.UUID;
 
 public class AuthorRepository implements IAuthorRepository {
     private final DbContext dbContext;
@@ -274,13 +279,21 @@ public class AuthorRepository implements IAuthorRepository {
     }
 
     @Override
-    public int count() throws SQLException, ClassNotFoundException {
-        String sql = "SELECT COUNT(*) FROM Author";
+    public int countAuthorBooks(String authorId) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT " +
+                       "COUNT(b.BookId) " + 
+                    "FROM " +
+                        "Author a " +
+                        "INNER JOIN Book b ON a.AuthorId = b.AuthorId " +
+                    "WHERE " +
+                        "a.AuthorId = UUID_TO_BIN(?)";
 
         Connection conn = dbContext.getConnection();
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, authorId);
+            ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 return rs.getInt(1);
@@ -392,6 +405,22 @@ public class AuthorRepository implements IAuthorRepository {
             }
         }
         return authors;
+    }
+
+    @Override
+    public int count() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(*) FROM Author";
+
+        Connection conn = dbContext.getConnection();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
     }
 
     private Author mapResultSetToAuthor(ResultSet rs) throws SQLException {

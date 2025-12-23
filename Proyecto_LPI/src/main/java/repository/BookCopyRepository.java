@@ -1,18 +1,23 @@
 package repository;
 
-import connection.DbContext;
-import model.BookCopy;
-import model.Book;
-import model.Author;
-import model.Category;
-import model.BookStatus;
-import model.BookCopyStatus;
-import model.Country;
-import model.Status;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+
+import connection.DbContext;
+import model.Author;
+import model.Book;
+import model.BookCopy;
+import model.BookCopyStatus;
+import model.BookStatus;
+import model.Category;
+import model.Country;
+import model.Status;
 
 public class BookCopyRepository implements IBookCopyRepository {
     private final DbContext dbContext;
@@ -209,6 +214,114 @@ public class BookCopyRepository implements IBookCopyRepository {
             }
             return 0;
         }
+    }
+
+    @Override
+    public int count() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(*) FROM BookCopy";
+
+        Connection conn = dbContext.getConnection();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public int count(String search, String bookId, String bookCopyStatusId) throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder("SELECT " +
+                                                "COUNT(bc.BookCopyId) " +
+                                            "FROM " +
+                                                "BookCopy bc " +
+                                                "INNER JOIN Book b ON bc.BookId = b.BookId " +
+                                            "WHERE " +
+                                                "1=1 ");
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND b.Title LIKE ? ");
+        }
+        if (bookId != null && !bookId.trim().isEmpty()) {
+            sql.append(" AND bc.BookId = UUID_TO_BIN(?)");
+        }
+        if (bookCopyStatusId != null && !bookCopyStatusId.trim().isEmpty()) {
+            sql.append(" AND bc.BookCopyStatusId = UUID_TO_BIN(?)");
+        }
+
+        Connection conn = dbContext.getConnection();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (bookId != null && !bookId.trim().isEmpty()) {
+                ps.setString(paramIndex++, bookId);
+            }
+            if (bookCopyStatusId != null && !bookCopyStatusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, bookCopyStatusId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public LinkedList<BookCopy> findAllPaginated(int offset, int limit, String search, String bookId, String bookCopyStatusId) throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder(buildSelectQuery() + "WHERE 1=1 ");
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (b.ISBN LIKE ? OR b.Title LIKE ?)");
+        }
+        if (bookId != null && !bookId.trim().isEmpty()) {
+            sql.append(" AND bc.BookId = UUID_TO_BIN(?) ");
+        }
+        if (bookCopyStatusId != null && !bookCopyStatusId.trim().isEmpty()) {
+            sql.append(" AND bc.BookCopyStatusId = UUID_TO_BIN(?) ");
+        }
+
+        sql.append(" ORDER BY b.Title ASC, bc.CreatedAt ASC LIMIT ? OFFSET ?");
+        
+        LinkedList<BookCopy> bookCopies = new LinkedList<>();
+        Connection conn = dbContext.getConnection();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (bookId != null && !bookId.trim().isEmpty()) {
+                ps.setString(paramIndex++, bookId);
+            }
+            if (bookCopyStatusId != null && !bookCopyStatusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, bookCopyStatusId);
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    bookCopies.add(mapResultSetToBookCopy(rs));
+                }
+            }
+        }
+        return bookCopies;
     }
 
     private String buildSelectQuery() {

@@ -140,7 +140,7 @@ public class AuthorController extends BaseServlet {
             out.println("    <span class=\"badge bg-primary\"><i class=\"bi bi-flag-fill me-1\"></i>" + 
                        escapeHtml(author.getCountry().getCountryName()) + "</span>");
         }
-        
+       
         out.println("  </div>");
         out.println("  <div class=\"col-md-8\">");
         out.println("    <table class=\"table table-borderless\">");        
@@ -172,6 +172,10 @@ public class AuthorController extends BaseServlet {
                             ? "<span class=\"badge bg-success\">Activo</span>" 
                             : "<span class=\"badge bg-secondary\">Inactivo</span>";
         out.println("        <td>" + statusBadge + "</td>");
+        out.println("      </tr>");
+        out.println("      <tr>");
+        out.println("        <th style=\"width: 40%\">Libros registrados:</th>");
+        out.println("        <td>" + authorService.getAuthorBookCount(author.getAuthorId()) + "</td>");
         out.println("      </tr>");
         
         out.println("    </table>");

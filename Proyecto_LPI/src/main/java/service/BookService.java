@@ -2,6 +2,7 @@ package service;
 
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.List;
 
 import dto.shared.PagedResult;
 import model.Book;
@@ -65,5 +66,10 @@ public class BookService implements IBookService {
     @Override
     public void delete(String bookId) throws SQLException, ClassNotFoundException {
         bookRepository.delete(bookId);
+    }
+
+    @Override
+    public List<Book> findAll() throws SQLException, ClassNotFoundException {
+        return bookRepository.findAll();
     }
 }

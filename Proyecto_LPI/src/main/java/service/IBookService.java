@@ -1,6 +1,7 @@
 package service;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import dto.shared.PagedResult;
 import model.Book;
@@ -20,4 +21,6 @@ public interface IBookService {
     void update(Book book) throws SQLException, ClassNotFoundException;
 
     void delete(String bookId) throws SQLException, ClassNotFoundException;
+
+    List<Book> findAll() throws SQLException, ClassNotFoundException;
 }

@@ -12,7 +12,7 @@ public interface IAuthorService {
             String countryId, String statusId) throws SQLException, ClassNotFoundException;
     ArrayList<Author> findAll() throws SQLException, ClassNotFoundException;
     int getTotalAuthorsCount() throws SQLException, ClassNotFoundException;
-    int getAuthorsWithBooksCount() throws SQLException, ClassNotFoundException;
+    int getAuthorBookCount(String authorId) throws SQLException, ClassNotFoundException;
     int getActiveAuthorsCount() throws SQLException, ClassNotFoundException;
     Author findById(String authorId) throws SQLException, ClassNotFoundException;
     void save(Author author) throws SQLException, ClassNotFoundException;

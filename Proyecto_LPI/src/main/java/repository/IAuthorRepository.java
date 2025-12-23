@@ -27,6 +27,8 @@ public interface IAuthorRepository {
     int count() throws SQLException, ClassNotFoundException;
 
     int count(String search, String countryId, String statusId) throws SQLException, ClassNotFoundException;
+    
+    int countAuthorBooks(String authorId) throws SQLException, ClassNotFoundException;
 
     LinkedList<Author> findAllPaginated(int offset, int limit) throws SQLException, ClassNotFoundException;
 

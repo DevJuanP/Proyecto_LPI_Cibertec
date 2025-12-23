@@ -15,13 +15,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Author;
 import model.Book;
+import model.BookCopy;
+import model.BookCopyStatus;
 import model.BookStatus;
 import model.Category;
 import model.Country;
 import model.Role;
 import model.Status;
 import model.User;
+import repository.IBookCopyStatusRepository;
 import service.IAuthorService;
+import service.IBookCopyService;
+import service.IBookCopyStatusService;
 import service.IBookService;
 import service.IBookStatusService;
 import service.ICategoryService;
@@ -85,6 +90,12 @@ public class AdminPanelController extends BaseServlet {
                     break;
                 case "edit-usuario":
                     loadEditUserData(request);
+                    break;
+                case "mantenimiento-ejemplares":
+                    loadBookCopiesData(request);
+                    break;
+                case "edit-ejemplar":
+                    loadEditBookCopyData(request);
                     break;
                 case "dashboard":
                 default:
@@ -289,6 +300,68 @@ public class AdminPanelController extends BaseServlet {
         request.setAttribute("user", user);
         request.setAttribute("statuses", statuses);
         request.setAttribute("roles", roles);
+    }
+
+    private void loadBookCopiesData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        IBookCopyService bookCopyService = getService(IBookCopyService.class);
+        IBookService bookService = getService(IBookService.class);
+        IBookCopyStatusRepository bookCopyStatusRepository = getService(IBookCopyStatusRepository.class);
+        
+        int currentPage = getIntParameter(request, "p", 1);
+        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        String search = request.getParameter("search");
+        String bookId = request.getParameter("bookId");
+        String bookStatusId = request.getParameter("bookStatusId");
+        
+        PagedResult<BookCopy> copiesResult = bookCopyService.getRegisteredBookCopies(
+            currentPage, pageSize, search, bookId, bookStatusId);
+        
+        List<Book> books = bookService.findAll();
+        List<BookCopyStatus> bookCopyStatuses = bookCopyStatusRepository.findAll();
+        
+        int availableCopiesCount = bookCopyService.findByStatus(
+            bookCopyService.getAvailableStatusId()).size();
+        int rentedCopiesCount = bookCopyService.findByStatus(
+            bookCopyService.getRentedStatusId()).size();
+        int maintenanceCopiesCount = bookCopyService.findByStatus(
+            bookCopyService.getMaintenanceStatusId()).size();
+        
+        request.setAttribute("copiesResult", copiesResult);
+        request.setAttribute("books", books);
+        request.setAttribute("bookCopyStatuses", bookCopyStatuses);
+        request.setAttribute("availableCopiesCount", availableCopiesCount);
+        request.setAttribute("rentedCopiesCount", rentedCopiesCount);
+        request.setAttribute("maintenanceCopiesCount", maintenanceCopiesCount);
+        
+        request.setAttribute("searchValue", search != null ? search : "");
+        request.setAttribute("bookIdValue", bookId != null ? bookId : "");
+        request.setAttribute("bookStatusIdValue", bookStatusId != null ? bookStatusId : "");
+    }
+
+    private void loadEditBookCopyData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        String bookCopyId = request.getParameter("id");
+        
+        if (bookCopyId == null || bookCopyId.isEmpty()) {
+            request.getSession().setAttribute("error", "ID de ejemplar requerido");
+            request.setAttribute("page", "mantenimiento-ejemplares");
+            return;
+        }
+        
+        IBookCopyService bookCopyService = getService(IBookCopyService.class);
+        IBookCopyStatusService bookCopyStatusService = getService(IBookCopyStatusService.class);
+        
+        BookCopy bookCopy = bookCopyService.findById(bookCopyId);
+        
+        if (bookCopy == null) {
+            request.getSession().setAttribute("error", "Ejemplar no encontrado");
+            request.setAttribute("page", "mantenimiento-ejemplares");
+            return;
+        }
+        
+        List<BookCopyStatus> bookCopyStatuses =  bookCopyStatusService.findAll();
+        
+        request.setAttribute("bookCopyStatuses", bookCopyStatuses);
+        request.setAttribute("bookCopy", bookCopy);
     }
 
     /**

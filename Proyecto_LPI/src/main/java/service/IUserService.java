@@ -11,7 +11,7 @@ import model.User;
 public interface IUserService {
 
     User authenticate(String email, String password) throws SQLException, ClassNotFoundException;
-    User adminAuthenticate(String email, String password) throws SQLException, ClassNotFoundException, AccessDeniedException;
+    User adminAuthenticate(String email, String password) throws SQLException, ClassNotFoundException, AccessDeniedException, IllegalStateException;
     User register(String email, String password, String statusId) throws SQLException, ClassNotFoundException;
     User getUserById(String userId) throws SQLException, ClassNotFoundException;
     User getUserByEmail(String email) throws SQLException, ClassNotFoundException;

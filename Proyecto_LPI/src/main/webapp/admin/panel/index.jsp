@@ -23,6 +23,16 @@
                 <i class="bi bi-speedometer2"></i>
                 <span>Dashboard</span>
             </a>
+
+            <!-- Operations Section -->
+            <div class="px-3 pt-3 pb-2">
+                <small class="text-white-50 text-uppercase fw-bold">Operaciones</small>
+            </div>
+
+            <a class="nav-link" href="?page=alquileres">
+                <i class="bi bi-book"></i>
+                <span>Alquileres</span>
+            </a>
             
             <!-- Reports Section -->
             <div class="px-3 pt-3 pb-2">
@@ -53,21 +63,26 @@
                 <i class="bi bi-book"></i>
                 <span>Gestión de Libros</span>
             </a>
+
+            <a class="nav-link" href="?page=mantenimiento-ejemplares">
+                <i class="bi bi-book"></i>
+                <span>Gestión de Ejemplares</span>
+            </a>
             
             <a class="nav-link" href="?page=mantenimiento-autores">
                 <i class="bi bi-person-badge"></i>
                 <span>Gestión de Autores</span>
+            </a>
+
+            <a class="nav-link" href="?page=mantenimiento-usuarios">
+                <i class="bi bi-people"></i>
+                <span>Gestión de Usuarios</span>
             </a>
             
             <!-- Additional Options -->
             <div class="px-3 pt-3 pb-2">
                 <small class="text-white-50 text-uppercase fw-bold">Sistema</small>
             </div>
-            
-            <a class="nav-link" href="?page=mantenimiento-usuarios">
-                <i class="bi bi-people"></i>
-                <span>Gestión de Usuarios</span>
-            </a>
             
             <a class="nav-link" href="#">
                 <i class="bi bi-gear"></i>
@@ -107,6 +122,9 @@
                 case "mantenimiento-usuarios":
                     contentPage = "items/mantenimiento-usuarios.jsp";
                     break;
+                case "mantenimiento-ejemplares":
+                    contentPage = "items/mantenimiento-ejemplares.jsp";
+                    break;
                 case "edit-autor":
                     contentPage = "items/edit-autor.jsp";
                     break;
@@ -115,6 +133,9 @@
                     break;
                 case "edit-usuario":
                     contentPage = "items/edit-usuario.jsp";
+                    break;
+                case "edit-ejemplar":
+                    contentPage = "items/edit-ejemplar.jsp";
                     break;
                 default:
                     contentPage = "items/dashboard.jsp";

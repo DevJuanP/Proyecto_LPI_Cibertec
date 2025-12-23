@@ -50,9 +50,8 @@ public class AuthorService implements IAuthorService {
     }
 
     @Override
-    public int getAuthorsWithBooksCount() throws SQLException, ClassNotFoundException {
-        // TODO: Implementar luego
-        return 0;
+    public int getAuthorBookCount(String authorId) throws SQLException, ClassNotFoundException {
+        return authorRepository.countAuthorBooks(authorId);
     }
 
     @Override

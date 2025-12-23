@@ -54,7 +54,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User adminAuthenticate(String email, String password) throws SQLException, ClassNotFoundException, AccessDeniedException {
+    public User adminAuthenticate(String email, String password) throws SQLException, ClassNotFoundException, AccessDeniedException, IllegalStateException {
         if (email == null || email.trim().isEmpty() || 
             password == null || password.trim().isEmpty()) {
             return null;
