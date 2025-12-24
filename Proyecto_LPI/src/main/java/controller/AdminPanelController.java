@@ -3,6 +3,7 @@ package controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import core.BaseServlet;
@@ -20,6 +21,8 @@ import model.BookCopyStatus;
 import model.BookStatus;
 import model.Category;
 import model.Country;
+import model.Rental;
+import model.RentalStatus;
 import model.Role;
 import model.Status;
 import model.User;
@@ -31,14 +34,15 @@ import service.IBookService;
 import service.IBookStatusService;
 import service.ICategoryService;
 import service.ICountryService;
+import service.IRentalService;
 import service.IRoleService;
 import service.IStatusService;
 import service.IUserService;
 import util.SessionUtil;
 
 /**
- * Controlador principal para el panel de administración.
- * Maneja la carga de datos según la página seleccionada.
+ * Controlador principal para el panel de administraciÃ³n.
+ * Maneja la carga de datos segÃºn la pÃ¡gina seleccionada.
  */
 @WebServlet("/admin/panel")
 public class AdminPanelController extends BaseServlet {
@@ -76,9 +80,6 @@ public class AdminPanelController extends BaseServlet {
                 case "edit-libro":
                     loadEditBookData(request);
                     break;
-                case "libros-alquiler":
-                    loadRentalsData(request);
-                    break;
                 case "libros-pedidos":
                     loadMostRequestedBooksData(request);
                     break;
@@ -97,13 +98,16 @@ public class AdminPanelController extends BaseServlet {
                 case "edit-ejemplar":
                     loadEditBookCopyData(request);
                     break;
+                case "alquileres":
+                    loadRentalsData(request);
+                    break;
                 case "dashboard":
                 default:
                     loadDashboardData(request);
                     break;
             }
         } catch (Exception e) {
-            System.err.println("Error cargando datos para página " + page + ": " + e.getMessage());
+            System.err.println("Error cargando datos para pÃ¡gina " + page + ": " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("error", "Error al cargar los datos: " + e.getMessage());
         }
@@ -112,7 +116,7 @@ public class AdminPanelController extends BaseServlet {
     }
 
     /**
-     * Carga los datos para la página de mantenimiento de autores.
+     * Carga los datos para la pÃ¡gina de mantenimiento de autores.
      */
     private void loadAuthorsData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         IAuthorService authorService = getService(IAuthorService.class);
@@ -144,7 +148,7 @@ public class AdminPanelController extends BaseServlet {
     }
 
     /**
-     * Carga los datos para la página de edición de autor.
+     * Carga los datos para la pÃ¡gina de ediciÃ³n de autor.
      */
     private void loadEditAuthorData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         String authorId = request.getParameter("id");
@@ -173,7 +177,7 @@ public class AdminPanelController extends BaseServlet {
     }
 
     /**
-     * Carga los datos para la página de mantenimiento de libros.
+     * Carga los datos para la pÃ¡gina de mantenimiento de libros.
      */
     private void loadBooksData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         IBookService bookService = getService(IBookService.class);
@@ -210,7 +214,7 @@ public class AdminPanelController extends BaseServlet {
     }
 
     /**
-     * Carga los datos para la página de edición de libro.
+     * Carga los datos para la pÃ¡gina de ediciÃ³n de libro.
      */
     private void loadEditBookData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         String bookId = request.getParameter("id");
@@ -365,24 +369,56 @@ public class AdminPanelController extends BaseServlet {
     }
 
     /**
-     * Carga los datos para la página de libros en alquiler.
+     * Carga los datos para la página de alquileres.
      */
-    private void loadRentalsData(HttpServletRequest request) {
-        // TODO: Implementar cuando exista RentalService
+    private void loadRentalsData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        IRentalService rentalService = getService(IRentalService.class);
+        IUserService userService = getService(IUserService.class);
+        IBookCopyService bookCopyService = getService(IBookCopyService.class);
+        
+        int currentPage = getIntParameter(request, "p", 1);
+        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        String search = request.getParameter("search");
+        String userId = request.getParameter("userId");
+        String rentalStatusId = request.getParameter("rentalStatusId");
+        
+        PagedResult<Rental> rentalsResult = rentalService.getRegisteredRentals(
+            currentPage, pageSize, search, userId, rentalStatusId);
+        
+        List<UserData> users = userService.getAllActiveUsers();
+        LinkedList<Book> availableBooks = bookCopyService.findAvailableBooks();
+        List<RentalStatus> rentalStatuses = rentalService.getAllRentalStatuses();
+        
+        int totalRentals = rentalService.getTotalRentalsCount();
+        int activeRentals = rentalService.getActiveRentalsCount();
+        int overdueRentals = rentalService.getOverdueRentalsCount();
+        
+        request.setAttribute("rentalsResult", rentalsResult);
+        request.setAttribute("users", users);
+        request.setAttribute("availableBooks", availableBooks);
+        request.setAttribute("rentalStatuses", rentalStatuses);
+        request.setAttribute("totalRentals", totalRentals);
+        request.setAttribute("activeRentals", activeRentals);
+        request.setAttribute("overdueRentals", overdueRentals);
+        request.setAttribute("defaultDailyRate", rentalService.getDefaultDailyRate());
+        
+        request.setAttribute("searchValue", search != null ? search : "");
+        request.setAttribute("userIdValue", userId != null ? userId : "");
+        request.setAttribute("rentalStatusIdValue", rentalStatusId != null ? rentalStatusId : "");
     }
 
     /**
-     * Carga los datos para la página de libros más pedidos.
+     * Carga los datos para la pÃ¡gina de libros mÃ¡s pedidos.
      */
     private void loadMostRequestedBooksData(HttpServletRequest request) {
         // TODO: Implementar cuando exista BookService
     }
 
     /**
-     * Carga los datos para la página de autores más pedidos.
+     * Carga los datos para la pÃ¡gina de autores mÃ¡s pedidos.
      */
     private void loadMostRequestedAuthorsData(HttpServletRequest request) {
-        // TODO: Implementar cuando exista estadísticas
+        // TODO: Implementar cuando exista estadÃ­sticas
     }
 
     /**
@@ -391,14 +427,14 @@ public class AdminPanelController extends BaseServlet {
     private void loadDashboardData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         IAuthorService authorService = getService(IAuthorService.class);
         
-        // Estadísticas básicas
+        // EstadÃ­sticas bÃ¡sicas
         request.setAttribute("totalAuthors", authorService.getTotalAuthorsCount());
         
-        // TODO: Agregar más estadísticas cuando existan los servicios
+        // TODO: Agregar mÃ¡s estadÃ­sticas cuando existan los servicios
     }
 
     /**
-     * Obtiene un parámetro entero del request con valor por defecto.
+     * Obtiene un parÃ¡metro entero del request con valor por defecto.
      */
     private int getIntParameter(HttpServletRequest request, String name, int defaultValue) {
         String value = request.getParameter(name);

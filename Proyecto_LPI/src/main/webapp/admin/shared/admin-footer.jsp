@@ -2,8 +2,7 @@
 <footer class="mt-5 py-3 text-center text-muted">
     <div class="container">
         <hr class="mb-3">
-        <p class="mb-0">&copy; <%= new java.util.Date().getYear() + 1900 %> BiblioAdmin - Sistema de Gestión Bibliotecaria</p>
-        <p class="small mb-0">Desarrollado con <i class="bi bi-heart-fill text-danger"></i> para bibliotecas modernas</p>
+        <p class="mb-0">&copy; <%= new java.util.Date().getYear() + 1900 %> Biblioteca Virtual - Admin - Sistema de Gestión Bibliotecaria</p>
     </div>
 </footer>
 

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import model.Book;
 import model.BookCopy;
 
 public interface IBookCopyRepository {
@@ -11,7 +12,9 @@ public interface IBookCopyRepository {
     List<BookCopy> findAll() throws SQLException, ClassNotFoundException;
     List<BookCopy> findByBook(String bookId) throws SQLException, ClassNotFoundException;
     List<BookCopy> findByStatus(String bookCopyStatusId) throws SQLException, ClassNotFoundException;
+    LinkedList<Book> findAvailableBooks() throws SQLException, ClassNotFoundException;
     List<BookCopy> findAvailableByBook(String bookId) throws SQLException, ClassNotFoundException;
+    BookCopy findFirstAvailableCopyByBookId(String bookId) throws SQLException, ClassNotFoundException;
     void save(BookCopy bookCopy) throws SQLException, ClassNotFoundException;
     void update(BookCopy bookCopy) throws SQLException, ClassNotFoundException;
     void delete(String bookCopyId) throws SQLException, ClassNotFoundException;

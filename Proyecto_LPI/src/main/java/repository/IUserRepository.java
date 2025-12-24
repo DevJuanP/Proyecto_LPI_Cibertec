@@ -11,6 +11,7 @@ public interface IUserRepository {
     User findById(String userId) throws SQLException, ClassNotFoundException;
     User findByEmail(String email) throws SQLException, ClassNotFoundException;
     List<User> findAll() throws SQLException, ClassNotFoundException;
+    LinkedList<User> findAllActive() throws SQLException, ClassNotFoundException;
     void save(User user) throws SQLException, ClassNotFoundException;
     void update(User user) throws SQLException, ClassNotFoundException;
     void delete(String userId) throws SQLException, ClassNotFoundException;

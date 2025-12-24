@@ -1,15 +1,18 @@
 package service;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 import dto.shared.PagedResult;
+import model.Book;
 import model.BookCopy;
 
 public interface IBookCopyService {
     BookCopy findById(String bookCopyId) throws SQLException, ClassNotFoundException;
     List<BookCopy> findByBook(String bookId) throws SQLException, ClassNotFoundException;
     List<BookCopy> findByStatus(String bookCopyStatusId) throws SQLException, ClassNotFoundException;
+    LinkedList<Book> findAvailableBooks() throws SQLException, ClassNotFoundException;
     List<BookCopy> findAvailableByBook(String bookId) throws SQLException, ClassNotFoundException;
     void save(BookCopy bookCopy) throws SQLException, ClassNotFoundException;
     void saveBatch(String bookId, int quantity, String notes) throws SQLException, ClassNotFoundException;

@@ -104,8 +104,8 @@
                 case "dashboard":
                     contentPage = "items/dashboard.jsp";
                     break;
-                case "libros-alquiler":
-                    contentPage = "items/libros-alquiler.jsp";
+                case "alquileres":
+                    contentPage = "items/mantenimiento-alquileres.jsp";
                     break;
                 case "libros-pedidos":
                     contentPage = "items/libros-pedidos.jsp";

@@ -191,9 +191,6 @@
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th style="width: 50px;">
-                                    <input type="checkbox" class="form-check-input" id="selectAll">
-                                </th>
                                 <th>ISBN</th>
                                 <th>Título</th>
                                 <th>Autor</th>
@@ -207,10 +204,6 @@
                         <tbody>
                             <c:forEach var="book" items="${booksResult.items}" varStatus="status">
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input row-checkbox" 
-                                               value="${book.bookId}">
-                                    </td>
                                     <td><code>${book.isbn}</code></td>
                                     <td>
                                         <div class="d-flex align-items-center">

@@ -629,14 +629,14 @@ public class BookRepository implements IBookRepository {
         book.setAuthorId(rs.getString("AuthorId"));
         book.setCategoryId(rs.getString("CategoryId"));
         
-        int publicationYear = rs.getInt("PublicationYear");
+        Integer publicationYear = rs.getInt("PublicationYear");
         if (!rs.wasNull()) {
             book.setPublicationYear(publicationYear);
         }
         
         book.setPublisher(rs.getString("Publisher"));
         
-        int pages = rs.getInt("Pages");
+        Integer pages = rs.getInt("Pages");
         if (!rs.wasNull()) {
             book.setPages(pages);
         }

@@ -14,6 +14,7 @@ import model.Country;
 import model.Status;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -125,7 +126,7 @@ public class RentalRepository implements IRentalRepository {
     @Override
     public List<Rental> findActiveRentals() throws SQLException, ClassNotFoundException {
         String sql = buildSelectQuery() + 
-                     " WHERE rs.RentalStatusName = 'Active' " +
+                     " WHERE rs.RentalStatusName = 'En Proceso' " +
                      " ORDER BY r.DueDate ASC";
         
         List<Rental> rentals = new ArrayList<>();
@@ -145,7 +146,7 @@ public class RentalRepository implements IRentalRepository {
     public List<Rental> findActiveRentalsByUser(String userId) throws SQLException, ClassNotFoundException {
         String sql = buildSelectQuery() + 
                      " WHERE r.UserId = UUID_TO_BIN(?) " +
-                     " AND rs.RentalStatusName = 'Active' " +
+                     " AND rs.RentalStatusName = 'En Proceso' " +
                      " ORDER BY r.DueDate ASC";
         
         List<Rental> rentals = new ArrayList<>();
@@ -166,7 +167,7 @@ public class RentalRepository implements IRentalRepository {
     @Override
     public List<Rental> findOverdueRentals() throws SQLException, ClassNotFoundException {
         String sql = buildSelectQuery() + 
-                     " WHERE rs.RentalStatusName = 'Active' " +
+                     " WHERE rs.RentalStatusName = 'En Proceso' " +
                      " AND r.DueDate < NOW() " +
                      " ORDER BY r.DueDate ASC";
         
@@ -186,7 +187,7 @@ public class RentalRepository implements IRentalRepository {
     @Override
     public List<Rental> findDueSoon(int days) throws SQLException, ClassNotFoundException {
         String sql = buildSelectQuery() + 
-                     " WHERE rs.RentalStatusName = 'Active' " +
+                     " WHERE rs.RentalStatusName = 'En Proceso' " +
                      " AND r.DueDate BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL ? DAY) " +
                      " ORDER BY r.DueDate ASC";
         
@@ -290,7 +291,7 @@ public class RentalRepository implements IRentalRepository {
     public boolean existsActiveRentalForBookCopy(String bookCopyId) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM Rental r " +
                      "INNER JOIN RentalStatus rs ON r.RentalStatusId = rs.RentalStatusId " +
-                     "WHERE r.BookCopyId = UUID_TO_BIN(?) AND rs.RentalStatusName = 'Active'";
+                     "WHERE r.BookCopyId = UUID_TO_BIN(?) AND rs.RentalStatusName = 'En Proceso'";
         
         Connection conn = dbContext.getConnection();
         
@@ -303,6 +304,138 @@ public class RentalRepository implements IRentalRepository {
                 return rs.getInt(1) > 0;
             }
             return false;
+        }
+    }
+
+    @Override
+    public LinkedList<Rental> findPaginated(int offset, int pageSize, String search, String userId, String rentalStatusId) 
+                                               throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder(buildSelectQuery());
+        
+        List<String> conditions = new ArrayList<>();
+        
+        if (search != null && !search.trim().isEmpty()) {
+            conditions.add("(u.Email LIKE ? OR b.Title LIKE ? OR b.ISBN LIKE ?)");
+        }
+        
+        if (userId != null && !userId.trim().isEmpty()) {
+            conditions.add("r.UserId = UUID_TO_BIN(?)");
+        }
+        
+        if (rentalStatusId != null && !rentalStatusId.trim().isEmpty()) {
+            conditions.add("r.RentalStatusId = UUID_TO_BIN(?)");
+        }
+        
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
+        
+        sql.append(" ORDER BY r.RentalDate DESC LIMIT ? OFFSET ?");
+        
+        LinkedList<Rental> rentals = new LinkedList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            
+            if (userId != null && !userId.trim().isEmpty()) {
+                ps.setString(paramIndex++, userId);
+            }
+            
+            if (rentalStatusId != null && !rentalStatusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, rentalStatusId);
+            }
+            
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex, offset);
+            
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                rentals.add(mapResultSetToRental(rs));
+            }
+        }
+        
+        return rentals;
+    }
+
+    @Override
+    public int countAll() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(*) FROM Rental";
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public int countByFilters(String search, String userId, String rentalStatusId) 
+                               throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(*) FROM Rental r " +
+            "INNER JOIN User u ON r.UserId = u.UserId " +
+            "INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId " +
+            "INNER JOIN Book b ON bc.BookId = b.BookId "
+        );
+        
+        List<String> conditions = new ArrayList<>();
+        
+        if (search != null && !search.trim().isEmpty()) {
+            conditions.add("(u.Email LIKE ? OR b.Title LIKE ? OR b.ISBN LIKE ?)");
+        }
+        
+        if (userId != null && !userId.trim().isEmpty()) {
+            conditions.add("r.UserId = UUID_TO_BIN(?)");
+        }
+        
+        if (rentalStatusId != null && !rentalStatusId.trim().isEmpty()) {
+            conditions.add("r.RentalStatusId = UUID_TO_BIN(?)");
+        }
+        
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            
+            if (userId != null && !userId.trim().isEmpty()) {
+                ps.setString(paramIndex++, userId);
+            }
+            
+            if (rentalStatusId != null && !rentalStatusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, rentalStatusId);
+            }
+            
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
         }
     }
 

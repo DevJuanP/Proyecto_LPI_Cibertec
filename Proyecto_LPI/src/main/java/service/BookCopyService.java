@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import dto.shared.PagedResult;
+import model.Book;
 import model.BookCopy;
 import repository.IBookCopyRepository;
 import repository.IBookCopyStatusRepository;
@@ -53,6 +54,11 @@ public class BookCopyService implements IBookCopyService {
     @Override
     public List<BookCopy> findByStatus(String bookCopyStatusId) throws SQLException, ClassNotFoundException {
         return bookCopyRepository.findByStatus(bookCopyStatusId);
+    }
+
+    @Override
+    public LinkedList<Book> findAvailableBooks() throws SQLException, ClassNotFoundException {
+        return bookCopyRepository.findAvailableBooks();
     }
     
     @Override

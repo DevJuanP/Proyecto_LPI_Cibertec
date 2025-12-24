@@ -121,6 +121,18 @@ public class UserService implements IUserService {
     public List<User> getAllUsers() throws SQLException, ClassNotFoundException {
         return userRepository.findAll();
     }
+
+    @Override
+    public ArrayList<UserData> getAllActiveUsers() throws SQLException, ClassNotFoundException {
+        LinkedList<User> users = userRepository.findAllActive();
+        
+        ArrayList<UserData> activeUsers = new ArrayList<>(users.size());
+        for (User user : users) {
+            activeUsers.add(mapToUserData(user));
+        }
+        
+        return activeUsers;
+    }
     
     @Override
     public void updateUser(User user) throws SQLException, ClassNotFoundException {

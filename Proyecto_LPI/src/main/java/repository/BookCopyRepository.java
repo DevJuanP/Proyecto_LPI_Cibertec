@@ -104,6 +104,161 @@ public class BookCopyRepository implements IBookCopyRepository {
     }
 
     @Override
+    public LinkedList<Book> findAvailableBooks() throws SQLException, ClassNotFoundException {
+        String sql = """
+                    SELECT 
+                        -- Book
+                        BIN_TO_UUID(b.BookId) as BookId,
+                        b.ISBN,
+                        b.Title,
+                        BIN_TO_UUID(b.AuthorId) as AuthorId,
+                        BIN_TO_UUID(b.CategoryId) as CategoryId,
+                        b.PublicationYear,
+                        b.Publisher,
+                        b.Pages,
+                        b.Language,
+                        b.Description,
+                        b.CoverImageUrl,
+                        BIN_TO_UUID(b.BookStatusId) as BookStatusId,
+                        b.CreatedAt,
+                        b.UpdatedAt,
+                        
+                        -- Author
+                        BIN_TO_UUID(a.AuthorId) as AuthorIdFull,
+                        a.FullName,
+                        a.Pseudonym,
+                        BIN_TO_UUID(a.CountryId) as AuthorCountryId,
+                        BIN_TO_UUID(a.StatusId) as AuthorStatusId,
+                        a.Biography,
+                        a.BirthYear,
+                        a.DeathYear,
+                        a.Website,
+                        a.Email,
+                        a.PhotoUrl,
+                        a.CreatedAt as AuthorCreatedAt,
+                        a.UpdatedAt as AuthorUpdatedAt,
+                        
+                        -- Country
+                        BIN_TO_UUID(cnt.CountryId) as CountryIdFull,
+                        cnt.CountryName,
+                        cnt.CountryCode,
+                        cnt.CreatedAt as CountryCreatedAt,
+                        cnt.UpdatedAt as CountryUpdatedAt,
+                        
+                        -- Status
+                        BIN_TO_UUID(s.StatusId) as StatusIdFull,
+                        s.StatusName,
+                        s.CreatedAt as StatusCreatedAt,
+                        s.UpdatedAt as StatusUpdatedAt,
+                        
+                        -- Category
+                        BIN_TO_UUID(c.CategoryId) as CategoryIdFull,
+                        c.CategoryName,
+                        c.Description,
+                        c.CreatedAt as CategoryCreatedAt,
+                        c.UpdatedAt as CategoryUpdatedAt,
+                        
+                        -- BookStatus
+                        BIN_TO_UUID(bs.BookStatusId) as BookStatusIdFull,
+                        bs.BookStatusName,
+                        bs.CreatedAt as BookStatusCreatedAt,
+                        bs.UpdatedAt as BookStatusUpdatedAt
+                    FROM
+                        Book b
+                        INNER JOIN Author a ON b.AuthorId = a.AuthorId
+                        INNER JOIN Status s ON a.StatusId = s.StatusId
+                        INNER JOIN Country cnt ON a.CountryId = cnt.CountryId
+                        INNER JOIN Category c ON b.CategoryId = c.CategoryId
+                        INNER JOIN BookStatus bs ON b.BookStatusId = bs.BookStatusId
+                    WHERE
+                        EXISTS (
+                            SELECT 1
+                            FROM BookCopy bc
+                            INNER JOIN BookCopyStatus bcs ON bc.BookCopyStatusId = bcs.BookCopyStatusId
+                            WHERE bc.BookId = b.BookId
+                            AND bcs.BookCopyStatusName = 'Disponible'
+                        )
+                        AND s.StatusName = 'Active'
+                        AND bs.BookStatusName = 'Activo'
+                        ORDER BY b.Title ASC;
+                    """;
+        
+        LinkedList<Book> books = new LinkedList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                books.add(mapResultSetToBook(rs));
+            }
+        }
+        return books;        
+    }
+
+    public BookCopy findFirstAvailableCopyByBookId(String bookId) throws SQLException, ClassNotFoundException {
+        String sql = """
+            SELECT
+                -- BookCopy
+                BIN_TO_UUID(bc.BookCopyId) as BookCopyId,
+                BIN_TO_UUID(bc.BookId) as BookId,
+                BIN_TO_UUID(bc.BookCopyStatusId) as BookCopyStatusId,
+                bc.Notes,
+                bc.CreatedAt as BookCopyCreatedAt,
+                bc.UpdatedAt as BookCopyUpdatedAt,
+                -- Book
+                BIN_TO_UUID(b.BookId) as BookIdFull, b.ISBN, b.Title,
+                BIN_TO_UUID(b.AuthorId) as AuthorId, BIN_TO_UUID(b.CategoryId) as CategoryId,
+                b.PublicationYear, b.Publisher, b.Pages, b.Language, b.Description,
+                b.CoverImageUrl, BIN_TO_UUID(b.BookStatusId) as BookStatusId,
+                b.CreatedAt as BookCreatedAt, b.UpdatedAt as BookUpdatedAt,
+                -- Author
+                BIN_TO_UUID(a.AuthorId) as AuthorIdFull, a.FullName, a.Pseudonym,
+                BIN_TO_UUID(a.CountryId) as AuthorCountryId, BIN_TO_UUID(a.StatusId) as AuthorStatusId,
+                a.Biography, a.BirthYear, a.DeathYear, a.Website, a.Email, a.PhotoUrl,
+                a.CreatedAt as AuthorCreatedAt, a.UpdatedAt as AuthorUpdatedAt,
+                -- Country
+                BIN_TO_UUID(c.CountryId) as CountryIdFull, c.CountryName, c.CountryCode,
+                c.CreatedAt as CountryCreatedAt, c.UpdatedAt as CountryUpdatedAt,
+                -- Status
+                BIN_TO_UUID(s.StatusId) as StatusIdFull, s.StatusName,
+                s.CreatedAt as StatusCreatedAt, s.UpdatedAt as StatusUpdatedAt,
+                -- Category
+                BIN_TO_UUID(cat.CategoryId) as CategoryIdFull, cat.CategoryName, cat.Description,
+                cat.CreatedAt as CategoryCreatedAt, cat.UpdatedAt as CategoryUpdatedAt,
+                -- BookStatus
+                BIN_TO_UUID(bs.BookStatusId) as BookStatusIdFull, bs.BookStatusName,
+                bs.CreatedAt as BookStatusCreatedAt, bs.UpdatedAt as BookStatusUpdatedAt,
+                -- BookCopyStatus
+                BIN_TO_UUID(bcs.BookCopyStatusId) as BookCopyStatusIdFull, bcs.BookCopyStatusName,
+                bcs.CreatedAt as BookCopyStatusCreatedAt, bcs.UpdatedAt as BookCopyStatusUpdatedAt
+            FROM BookCopy bc
+            INNER JOIN Book b ON bc.BookId = b.BookId
+            INNER JOIN Author a ON b.AuthorId = a.AuthorId
+            INNER JOIN Country c ON a.CountryId = c.CountryId
+            INNER JOIN Status s ON a.StatusId = s.StatusId
+            INNER JOIN Category cat ON b.CategoryId = cat.CategoryId
+            INNER JOIN BookStatus bs ON b.BookStatusId = bs.BookStatusId
+            INNER JOIN BookCopyStatus bcs ON bc.BookCopyStatusId = bcs.BookCopyStatusId
+            WHERE bc.BookId = UUID_TO_BIN(?)
+            AND bcs.BookCopyStatusName = 'Disponible'
+            LIMIT 1
+            """;
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, bookId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return mapResultSetToBookCopy(rs);
+            }
+            return null;
+        }
+    }
+
+    @Override
     public List<BookCopy> findAvailableByBook(String bookId) throws SQLException, ClassNotFoundException {
         String sql = buildSelectQuery() + 
                      " WHERE bc.BookId = UUID_TO_BIN(?) " +
@@ -459,5 +614,82 @@ public class BookCopyRepository implements IBookCopyRepository {
         bookCopy.setBookCopyStatus(bookCopyStatus);
         
         return bookCopy;
+    }
+
+    private Book mapResultSetToBook(ResultSet rs) throws SQLException {
+        Book book = new Book();
+        book.setBookId(rs.getString("BookId"));
+        book.setIsbn(rs.getString("ISBN"));
+        book.setTitle(rs.getString("Title"));
+        book.setAuthorId(rs.getString("AuthorId"));
+        book.setCategoryId(rs.getString("CategoryId"));
+        
+        Integer publicationYear = rs.getInt("PublicationYear");
+        if (!rs.wasNull()) {
+            book.setPublicationYear(publicationYear);
+        }
+        
+        book.setPublisher(rs.getString("Publisher"));
+        
+        Integer pages = rs.getInt("Pages");
+        if (!rs.wasNull()) {
+            book.setPages(pages);
+        }
+        
+        book.setLanguage(rs.getString("Language"));
+        book.setDescription(rs.getString("Description"));
+        book.setCoverImageUrl(rs.getString("CoverImageUrl"));
+        book.setBookStatusId(rs.getString("BookStatusId"));
+        book.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+        book.setUpdatedAt(rs.getTimestamp("UpdatedAt").toLocalDateTime());
+        
+        Author author = new Author();
+        author.setAuthorId(rs.getString("AuthorIdFull"));
+        author.setFullName(rs.getString("FullName"));
+        author.setPseudonym(rs.getString("Pseudonym"));
+        author.setCountryId(rs.getString("AuthorCountryId"));
+        author.setStatusId(rs.getString("AuthorStatusId"));
+        author.setBiography(rs.getString("Biography"));
+        author.setBirthYear(rs.getObject("BirthYear", Integer.class));
+        author.setDeathYear(rs.getObject("DeathYear", Integer.class));
+        author.setWebsite(rs.getString("Website"));
+        author.setEmail(rs.getString("Email"));
+        author.setPhotoUrl(rs.getString("PhotoUrl"));
+        author.setCreatedAt(rs.getTimestamp("AuthorCreatedAt").toLocalDateTime());
+        author.setUpdatedAt(rs.getTimestamp("AuthorUpdatedAt").toLocalDateTime());
+        
+        Country country = new Country();
+        country.setCountryId(rs.getString("CountryIdFull"));
+        country.setCountryName(rs.getString("CountryName"));
+        country.setCountryCode(rs.getString("CountryCode"));
+        country.setCreatedAt(rs.getTimestamp("CountryCreatedAt").toLocalDateTime());
+        country.setUpdatedAt(rs.getTimestamp("CountryUpdatedAt").toLocalDateTime());
+        author.setCountry(country);
+        
+        Status status = new Status();
+        status.setStatusId(rs.getString("StatusIdFull"));
+        status.setStatusName(rs.getString("StatusName"));
+        status.setCreatedAt(rs.getTimestamp("StatusCreatedAt").toLocalDateTime());
+        status.setUpdatedAt(rs.getTimestamp("StatusUpdatedAt").toLocalDateTime());
+        author.setStatus(status);
+        
+        book.setAuthor(author);
+        
+        Category category = new Category();
+        category.setCategoryId(rs.getString("CategoryIdFull"));
+        category.setCategoryName(rs.getString("CategoryName"));
+        category.setDescription(rs.getString("Description"));
+        category.setCreatedAt(rs.getTimestamp("CategoryCreatedAt").toLocalDateTime());
+        category.setUpdatedAt(rs.getTimestamp("CategoryUpdatedAt").toLocalDateTime());
+        book.setCategory(category);
+        
+        BookStatus bookStatus = new BookStatus();
+        bookStatus.setBookStatusId(rs.getString("BookStatusIdFull"));
+        bookStatus.setBookStatusName(rs.getString("BookStatusName"));
+        bookStatus.setCreatedAt(rs.getTimestamp("BookStatusCreatedAt").toLocalDateTime());
+        bookStatus.setUpdatedAt(rs.getTimestamp("BookStatusUpdatedAt").toLocalDateTime());
+        book.setBookStatus(bookStatus);
+        
+        return book;
     }
 }

@@ -88,6 +88,30 @@ public class UserRepository implements IUserRepository {
         return users;
     }
 
+    public LinkedList<User> findAllActive() throws SQLException, ClassNotFoundException {
+        String sql = "SELECT BIN_TO_UUID(u.UserId) as UserId, u.Email, u.Password, " +
+                     "BIN_TO_UUID(u.StatusId) as StatusId, u.CreatedAt, u.UpdatedAt, " +
+                     "BIN_TO_UUID(s.StatusId) as StatusIdFull, s.StatusName, s.CreatedAt as StatusCreatedAt, s.UpdatedAt as StatusUpdatedAt " +
+                     "FROM User u " +
+                     "INNER JOIN Status s ON u.StatusId = s.StatusId " +
+                     "WHERE s.StatusName = 'Active' " +
+                     "ORDER BY u.CreatedAt DESC";
+        
+        LinkedList<User> users = new LinkedList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                User user = mapResultSetToUser(rs);
+                user.setRoles(findRolesByUserId(user.getUserId()));
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
     public void save(User user) throws SQLException, ClassNotFoundException {
         String sql = "INSERT INTO User (UserId, Email, Password, StatusId) " +
                      "VALUES (UUID_TO_BIN(?), ?, ?, UUID_TO_BIN(?))";

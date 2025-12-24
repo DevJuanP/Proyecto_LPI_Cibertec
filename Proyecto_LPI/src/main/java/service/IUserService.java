@@ -2,6 +2,7 @@ package service;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import dto.shared.PagedResult;
@@ -25,4 +26,5 @@ public interface IUserService {
     public PagedResult<UserData> getRegisteredUsers(int page, int pageSize, String search, String roleId, String statusId) throws SQLException, ClassNotFoundException;
     int getTotalUsersCount() throws SQLException, ClassNotFoundException;
     int getActiveUsersCount() throws SQLException, ClassNotFoundException;
+    ArrayList<UserData> getAllActiveUsers() throws SQLException, ClassNotFoundException;
 }

@@ -1,6 +1,7 @@
 package repository;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 import model.Rental;
@@ -19,4 +20,9 @@ public interface IRentalRepository {
     void update(Rental rental) throws SQLException, ClassNotFoundException;
     void delete(String rentalId) throws SQLException, ClassNotFoundException;
     boolean existsActiveRentalForBookCopy(String bookCopyId) throws SQLException, ClassNotFoundException;
+    LinkedList<Rental> findPaginated(int offset, int pageSize, String search, String userId, String rentalStatusId) 
+                                               throws SQLException, ClassNotFoundException;
+    int countAll() throws SQLException, ClassNotFoundException;
+    int countByFilters(String search, String userId, String rentalStatusId) 
+                               throws SQLException, ClassNotFoundException;
 }

@@ -178,9 +178,6 @@
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th style="width: 50px;">
-                                    <input type="checkbox" class="form-check-input" id="selectAll">
-                                </th>
                                 <th>Email</th>
                                 <th>Roles</th>
                                 <th>Estado</th>
@@ -192,10 +189,6 @@
                         <tbody>
                             <c:forEach var="user" items="${usersResult.items}" varStatus="status">
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input row-checkbox" 
-                                               value="${user.userId}">
-                                    </td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2"

@@ -170,9 +170,6 @@
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th style="width: 50px;">
-                                    <input type="checkbox" class="form-check-input" id="selectAll">
-                                </th>
                                 <th>Autor</th>
                                 <th>Pseudónimo</th>
                                 <th>Nacionalidad</th>
@@ -185,10 +182,6 @@
                         <tbody>
                             <c:forEach var="author" items="${authorsResult.items}" varStatus="status">
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input row-checkbox" 
-                                               value="${author.authorId}">
-                                    </td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <c:set var="avatarUrl" value="https://ui-avatars.com/api/?name=${fn:replace(author.fullName, ' ', '+')}&size=40&background=3498db&color=fff" />
