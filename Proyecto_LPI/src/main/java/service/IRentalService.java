@@ -23,6 +23,13 @@ public interface IRentalService {
     int getTotalRentalsCount() throws SQLException, ClassNotFoundException;
     int getActiveRentalsCount() throws SQLException, ClassNotFoundException;
     int getOverdueRentalsCount() throws SQLException, ClassNotFoundException;
+    int getDueSoonRentalsCount(int days) throws SQLException, ClassNotFoundException;
+    int getOnTimeRentalsCount(int dueSoonDays) throws SQLException, ClassNotFoundException;
+    
+    PagedResult<Rental> findActiveRentals(int page, int pageSize, String search, String state, Integer dueSoonDays, String fromDate, String toDate)
+                                                      throws SQLException, ClassNotFoundException;    
+    List<Rental> findOverdueRentals() throws SQLException, ClassNotFoundException;
+    List<Rental> findDueSoonRentals(int days) throws SQLException, ClassNotFoundException;
     
     List<RentalStatus> getAllRentalStatuses() throws SQLException, ClassNotFoundException;
     

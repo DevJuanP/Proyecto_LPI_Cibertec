@@ -66,11 +66,11 @@ public class RentalService implements IRentalService {
         BookCopy bookCopy = bookCopyRepository.findFirstAvailableCopyByBookId(bookId);
 
         if (bookCopy == null) {
-            throw new IllegalStateException("No se encontró ejemplar disponible para ser alquilado al usuario");
+            throw new IllegalStateException("No se encontrÃ³ ejemplar disponible para ser alquilado al usuario");
         }
 
         if (rentalRepository.existsActiveRentalForBookCopy(bookCopy.getBookCopyId())) {
-            throw new IllegalStateException("Este ejemplar ya está alquilado");
+            throw new IllegalStateException("Este ejemplar ya estÃ¡ alquilado");
         }
         
         String activeStatusId = rentalStatusRepository.findByName("En Proceso").getRentalStatusId();
@@ -158,6 +158,50 @@ public class RentalService implements IRentalService {
     @Override
     public int getOverdueRentalsCount() throws SQLException, ClassNotFoundException {
         return rentalRepository.findOverdueRentals().size();
+    }
+
+    @Override
+    public int getDueSoonRentalsCount(int days) throws SQLException, ClassNotFoundException {
+        return rentalRepository.findDueSoon(days).size();
+    }
+
+    @Override
+    public int getOnTimeRentalsCount(int dueSoonDays) throws SQLException, ClassNotFoundException {
+        String activeStatusId = rentalStatusRepository.findByName("En Proceso").getRentalStatusId();
+        if (activeStatusId == null) {
+            return 0;
+        }
+        List<Rental> activeRentals = rentalRepository.findByStatus(activeStatusId);
+        List<Rental> overdueRentals = rentalRepository.findOverdueRentals();
+        List<Rental> dueSoonRentals = rentalRepository.findDueSoon(dueSoonDays);
+        
+        return activeRentals.size() - overdueRentals.size() - dueSoonRentals.size();
+    }
+
+    @Override
+    public PagedResult<Rental> findActiveRentals(int page, int pageSize, String search, String state, Integer dueSoonDays, String fromDate, String toDate)
+                                                      throws SQLException, ClassNotFoundException {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 100) pageSize = 100;
+        
+        int offset = (page - 1) * pageSize;
+        
+        int totalItems = rentalRepository.countByActiveRentalsFilters(search, state, dueSoonDays, fromDate, toDate);
+        
+        LinkedList<Rental> rentals = rentalRepository.findActiveRentals(offset, pageSize, search, state, dueSoonDays, fromDate, toDate);
+        
+        return new PagedResult<>(rentals, page, pageSize, totalItems);
+    }
+
+    @Override
+    public List<Rental> findOverdueRentals() throws SQLException, ClassNotFoundException {
+        return rentalRepository.findOverdueRentals();
+    }
+
+    @Override
+    public List<Rental> findDueSoonRentals(int days) throws SQLException, ClassNotFoundException {
+        return rentalRepository.findDueSoon(days);
     }
 
     @Override

@@ -137,6 +137,9 @@
                 case "edit-ejemplar":
                     contentPage = "items/edit-ejemplar.jsp";
                     break;
+                case "libros-alquiler":
+                    contentPage = "items/libros-alquiler.jsp";
+                    break;
                 default:
                     contentPage = "items/dashboard.jsp";
             }

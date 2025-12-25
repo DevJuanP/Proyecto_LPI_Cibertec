@@ -124,21 +124,77 @@ public class RentalRepository implements IRentalRepository {
     }
 
     @Override
-    public List<Rental> findActiveRentals() throws SQLException, ClassNotFoundException {
-        String sql = buildSelectQuery() + 
-                     " WHERE rs.RentalStatusName = 'En Proceso' " +
-                     " ORDER BY r.DueDate ASC";
+    public LinkedList<Rental> findActiveRentals(int offset, int pageSize, String search, String state, Integer dueSoonDays, String fromDate, String toDate) 
+                                            throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder(buildSelectQuery() + """
+                WHERE 
+                    rs.RentalStatusName = 'En Proceso' 
+                """);
         
-        List<Rental> rentals = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
+        
+        if (search != null && !search.trim().isEmpty()) {
+            conditions.add("(u.Email LIKE ? OR r.RentalId = UUID_TO_BIN(?) OR b.Title LIKE ? OR b.ISBN LIKE ? OR a.FullName LIKE ?)");
+        }
+
+        if (state != null && !state.trim().isEmpty() && state.equalsIgnoreCase("vencer") && dueSoonDays != null) {
+            conditions.add("(r.DueDate >= CURDATE())");
+            conditions.add("(r.DueDate <= DATE_ADD(CURDATE(), INTERVAL ? DAY))");
+        } else if (state != null && !state.trim().isEmpty() && state.equalsIgnoreCase("vencido")) {
+            conditions.add("(r.DueDate < CURDATE())");
+        }
+
+        if (fromDate != null && !fromDate.trim().isEmpty()) {
+            conditions.add("(r.RentalDate >= ?)");
+        }
+
+        if (toDate != null && !toDate.trim().isEmpty()) {
+            conditions.add("(r.RentalDate <= ?)");
+        }
+
+        if (!conditions.isEmpty()) {
+            sql.append(" AND ").append(String.join(" AND ", conditions));
+        }
+        
+        sql.append(" ORDER BY r.DueDate DESC LIMIT ? OFFSET ?");
+        
+        LinkedList<Rental> rentals = new LinkedList<>();
         Connection conn = dbContext.getConnection();
         
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, search.trim());
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            
+            if (state != null && !state.trim().isEmpty() && state.equalsIgnoreCase("vencer") && dueSoonDays != null) {
+                ps.setInt(paramIndex++, dueSoonDays);
+            }
+            
+            if (fromDate != null && !fromDate.trim().isEmpty()) {
+                ps.setString(paramIndex++, fromDate);
+            }
+            
+            if (toDate != null && !toDate.trim().isEmpty()) {
+                ps.setString(paramIndex++, toDate);
+            }
+            
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex, offset);
+            
+            ResultSet rs = ps.executeQuery();
             
             while (rs.next()) {
                 rentals.add(mapResultSetToRental(rs));
             }
         }
+        
         return rentals;
     }
 
@@ -439,64 +495,141 @@ public class RentalRepository implements IRentalRepository {
         }
     }
 
+    @Override
+    public int countByActiveRentalsFilters(String search, String state, Integer dueSoonDays, String fromDate, String toDate) 
+                                        throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder(
+            """
+                SELECT COUNT(*) FROM Rental r 
+                INNER JOIN User u ON r.UserId = u.UserId 
+                INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId 
+                INNER JOIN Book b ON bc.BookId = b.BookId 
+                INNER JOIN Author a ON b.AuthorId = a.AuthorId 
+                INNER JOIN RentalStatus rs ON r.RentalStatusId = rs.RentalStatusId 
+                WHERE rs.RentalStatusName = 'En Proceso' 
+            """
+        );
+        
+        List<String> conditions = new ArrayList<>();
+        
+        if (search != null && !search.trim().isEmpty()) {
+            conditions.add("(u.Email LIKE ? OR r.RentalId = UUID_TO_BIN(?) OR b.Title LIKE ? OR b.ISBN LIKE ? OR a.FullName LIKE ?)");
+        }
+
+        if (state != null && !state.trim().isEmpty() && state.equalsIgnoreCase("vencer") && dueSoonDays != null) {
+            conditions.add("(r.DueDate >= CURDATE())");
+            conditions.add("(r.DueDate <= DATE_ADD(CURDATE(), INTERVAL ? DAY))");
+        } else if (state != null && !state.trim().isEmpty() && state.equalsIgnoreCase("vencido")) {
+            conditions.add("(r.DueDate < CURDATE())");
+        }
+
+        if (fromDate != null && !fromDate.trim().isEmpty()) {
+            conditions.add("(r.RentalDate >= ?)");
+        }
+
+        if (toDate != null && !toDate.trim().isEmpty()) {
+            conditions.add("(r.RentalDate <= ?)");
+        }
+        
+        if (!conditions.isEmpty()) {
+            sql.append(" AND ").append(String.join(" AND ", conditions));
+        }
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, search.trim());
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            
+            if (state != null && !state.trim().isEmpty() && state.equalsIgnoreCase("vencer") && dueSoonDays != null) {
+                ps.setInt(paramIndex++, dueSoonDays);
+            }
+            
+            if (fromDate != null && !fromDate.trim().isEmpty()) {
+                ps.setString(paramIndex++, fromDate);
+            }
+            
+            if (toDate != null && !toDate.trim().isEmpty()) {
+                ps.setString(paramIndex++, toDate);
+            }
+            
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
     private String buildSelectQuery() {
-        return "SELECT " +
-               // Rental
-               "BIN_TO_UUID(r.RentalId) as RentalId, BIN_TO_UUID(r.UserId) as UserId, " +
-               "BIN_TO_UUID(r.BookCopyId) as BookCopyId, BIN_TO_UUID(r.RentalStatusId) as RentalStatusId, " +
-               "r.RentalDate, r.DueDate, r.ReturnDate, r.RentalDays, r.DailyRate, r.TotalCost, r.Notes, " +
-               "r.CreatedAt as RentalCreatedAt, r.UpdatedAt as RentalUpdatedAt, " +
-               // User
-               "BIN_TO_UUID(u.UserId) as UserIdFull, u.Email, u.Password, BIN_TO_UUID(u.StatusId) as UserStatusId, " +
-               "u.CreatedAt as UserCreatedAt, u.UpdatedAt as UserUpdatedAt, " +
-               // User Status
-               "BIN_TO_UUID(us.StatusId) as UserStatusIdFull, us.StatusName as UserStatusName, " +
-               "us.CreatedAt as UserStatusCreatedAt, us.UpdatedAt as UserStatusUpdatedAt, " +
-               // BookCopy
-               "BIN_TO_UUID(bc.BookCopyId) as BookCopyIdFull, BIN_TO_UUID(bc.BookId) as BookId, " +
-               "BIN_TO_UUID(bc.BookCopyStatusId) as BookCopyStatusId, bc.Notes as BookCopyNotes, " +
-               "bc.CreatedAt as BookCopyCreatedAt, bc.UpdatedAt as BookCopyUpdatedAt, " +
-               // Book
-               "BIN_TO_UUID(b.BookId) as BookIdFull, b.ISBN, b.Title, " +
-               "BIN_TO_UUID(b.AuthorId) as AuthorId, BIN_TO_UUID(b.CategoryId) as CategoryId, " +
-               "b.PublicationYear, b.Publisher, b.Pages, b.Language, b.Description, " +
-               "b.CoverImageUrl, BIN_TO_UUID(b.BookStatusId) as BookStatusId, " +
-               "b.CreatedAt as BookCreatedAt, b.UpdatedAt as BookUpdatedAt, " +
-               // Author
-               "BIN_TO_UUID(a.AuthorId) as AuthorIdFull, a.FullName, a.Pseudonym, " +
-               "BIN_TO_UUID(a.CountryId) as AuthorCountryId, BIN_TO_UUID(a.StatusId) as AuthorStatusId, " +
-               "a.Biography, a.BirthYear, a.DeathYear, a.Website, a.Email as AuthorEmail, a.PhotoUrl, " +
-               "a.CreatedAt as AuthorCreatedAt, a.UpdatedAt as AuthorUpdatedAt, " +
-               // Country
-               "BIN_TO_UUID(c.CountryId) as CountryIdFull, c.CountryName, c.CountryCode, " +
-               "c.CreatedAt as CountryCreatedAt, c.UpdatedAt as CountryUpdatedAt, " +
-               // Status
-               "BIN_TO_UUID(ast.StatusId) as AuthorStatusIdFull, ast.StatusName as AuthorStatusName, " +
-               "ast.CreatedAt as AuthorStatusCreatedAt, ast.UpdatedAt as AuthorStatusUpdatedAt, " +
-               // Category
-               "BIN_TO_UUID(cat.CategoryId) as CategoryIdFull, cat.CategoryName, cat.Description, " +
-               "cat.CreatedAt as CategoryCreatedAt, cat.UpdatedAt as CategoryUpdatedAt, " +
-               // BookStatus
-               "BIN_TO_UUID(bs.BookStatusId) as BookStatusIdFull, bs.BookStatusName, " +
-               "bs.CreatedAt as BookStatusCreatedAt, bs.UpdatedAt as BookStatusUpdatedAt, " +
-               // BookCopyStatus
-               "BIN_TO_UUID(bcs.BookCopyStatusId) as BookCopyStatusIdFull, bcs.BookCopyStatusName, " +
-               "bcs.CreatedAt as BookCopyStatusCreatedAt, bcs.UpdatedAt as BookCopyStatusUpdatedAt, " +
-               // RentalStatus
-               "BIN_TO_UUID(rs.RentalStatusId) as RentalStatusIdFull, rs.RentalStatusName, " +
-               "rs.CreatedAt as RentalStatusCreatedAt, rs.UpdatedAt as RentalStatusUpdatedAt " +
-               "FROM Rental r " +
-               "INNER JOIN User u ON r.UserId = u.UserId " +
-               "INNER JOIN Status us ON u.StatusId = us.StatusId " +
-               "INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId " +
-               "INNER JOIN Book b ON bc.BookId = b.BookId " +
-               "INNER JOIN Author a ON b.AuthorId = a.AuthorId " +
-               "INNER JOIN Country c ON a.CountryId = c.CountryId " +
-               "INNER JOIN Status ast ON a.StatusId = ast.StatusId " +
-               "INNER JOIN Category cat ON b.CategoryId = cat.CategoryId " +
-               "INNER JOIN BookStatus bs ON b.BookStatusId = bs.BookStatusId " +
-               "INNER JOIN BookCopyStatus bcs ON bc.BookCopyStatusId = bcs.BookCopyStatusId " +
-               "INNER JOIN RentalStatus rs ON r.RentalStatusId = rs.RentalStatusId ";
+        return """
+            SELECT 
+                -- Rental
+                BIN_TO_UUID(r.RentalId) as RentalId, BIN_TO_UUID(r.UserId) as UserId, 
+                BIN_TO_UUID(r.BookCopyId) as BookCopyId, BIN_TO_UUID(r.RentalStatusId) as RentalStatusId, 
+                r.RentalDate, r.DueDate, r.ReturnDate, r.RentalDays, r.DailyRate, r.TotalCost, r.Notes, 
+                r.CreatedAt as RentalCreatedAt, r.UpdatedAt as RentalUpdatedAt, 
+                -- User
+                BIN_TO_UUID(u.UserId) as UserIdFull, u.Email, u.Password, BIN_TO_UUID(u.StatusId) as UserStatusId, 
+                u.CreatedAt as UserCreatedAt, u.UpdatedAt as UserUpdatedAt, 
+                -- User Status
+                BIN_TO_UUID(us.StatusId) as UserStatusIdFull, us.StatusName as UserStatusName, 
+                us.CreatedAt as UserStatusCreatedAt, us.UpdatedAt as UserStatusUpdatedAt, 
+                -- BookCopy
+                BIN_TO_UUID(bc.BookCopyId) as BookCopyIdFull, BIN_TO_UUID(bc.BookId) as BookId, 
+                BIN_TO_UUID(bc.BookCopyStatusId) as BookCopyStatusId, bc.Notes as BookCopyNotes, 
+                bc.CreatedAt as BookCopyCreatedAt, bc.UpdatedAt as BookCopyUpdatedAt, 
+                -- Book
+                BIN_TO_UUID(b.BookId) as BookIdFull, b.ISBN, b.Title, 
+                BIN_TO_UUID(b.AuthorId) as AuthorId, BIN_TO_UUID(b.CategoryId) as CategoryId, 
+                b.PublicationYear, b.Publisher, b.Pages, b.Language, b.Description, 
+                b.CoverImageUrl, BIN_TO_UUID(b.BookStatusId) as BookStatusId, 
+                b.CreatedAt as BookCreatedAt, b.UpdatedAt as BookUpdatedAt, 
+                -- Author
+                BIN_TO_UUID(a.AuthorId) as AuthorIdFull, a.FullName, a.Pseudonym, 
+                BIN_TO_UUID(a.CountryId) as AuthorCountryId, BIN_TO_UUID(a.StatusId) as AuthorStatusId, 
+                a.Biography, a.BirthYear, a.DeathYear, a.Website, a.Email as AuthorEmail, a.PhotoUrl, 
+                a.CreatedAt as AuthorCreatedAt, a.UpdatedAt as AuthorUpdatedAt, 
+                -- Country
+                BIN_TO_UUID(c.CountryId) as CountryIdFull, c.CountryName, c.CountryCode, 
+                c.CreatedAt as CountryCreatedAt, c.UpdatedAt as CountryUpdatedAt, 
+                -- Status (Author)
+                BIN_TO_UUID(ast.StatusId) as AuthorStatusIdFull, ast.StatusName as AuthorStatusName, 
+                ast.CreatedAt as AuthorStatusCreatedAt, ast.UpdatedAt as AuthorStatusUpdatedAt, 
+                -- Category
+                BIN_TO_UUID(cat.CategoryId) as CategoryIdFull, cat.CategoryName, cat.Description, 
+                cat.CreatedAt as CategoryCreatedAt, cat.UpdatedAt as CategoryUpdatedAt, 
+                -- BookStatus
+                BIN_TO_UUID(bs.BookStatusId) as BookStatusIdFull, bs.BookStatusName, 
+                bs.CreatedAt as BookStatusCreatedAt, bs.UpdatedAt as BookStatusUpdatedAt, 
+                -- BookCopyStatus
+                BIN_TO_UUID(bcs.BookCopyStatusId) as BookCopyStatusIdFull, bcs.BookCopyStatusName, 
+                bcs.CreatedAt as BookCopyStatusCreatedAt, bcs.UpdatedAt as BookCopyStatusUpdatedAt, 
+                -- RentalStatus
+                BIN_TO_UUID(rs.RentalStatusId) as RentalStatusIdFull, rs.RentalStatusName, 
+                rs.CreatedAt as RentalStatusCreatedAt, rs.UpdatedAt as RentalStatusUpdatedAt 
+            FROM Rental r 
+            INNER JOIN User u ON r.UserId = u.UserId 
+            INNER JOIN Status us ON u.StatusId = us.StatusId 
+            INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId 
+            INNER JOIN Book b ON bc.BookId = b.BookId 
+            INNER JOIN Author a ON b.AuthorId = a.AuthorId 
+            INNER JOIN Country c ON a.CountryId = c.CountryId 
+            INNER JOIN Status ast ON a.StatusId = ast.StatusId 
+            INNER JOIN Category cat ON b.CategoryId = cat.CategoryId 
+            INNER JOIN BookStatus bs ON b.BookStatusId = bs.BookStatusId 
+            INNER JOIN BookCopyStatus bcs ON bc.BookCopyStatusId = bcs.BookCopyStatusId 
+            INNER JOIN RentalStatus rs ON r.RentalStatusId = rs.RentalStatusId 
+            """;
     }
 
     private Rental mapResultSetToRental(ResultSet rs) throws SQLException {

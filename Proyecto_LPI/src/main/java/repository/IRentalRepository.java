@@ -12,7 +12,8 @@ public interface IRentalRepository {
     List<Rental> findByUser(String userId) throws SQLException, ClassNotFoundException;
     List<Rental> findByBookCopy(String bookCopyId) throws SQLException, ClassNotFoundException;
     List<Rental> findByStatus(String rentalStatusId) throws SQLException, ClassNotFoundException;
-    List<Rental> findActiveRentals() throws SQLException, ClassNotFoundException;
+    LinkedList<Rental> findActiveRentals(int offset, int pageSize, String search, String state, Integer dueSoonDays, String fromDate, String toDate) 
+                                            throws SQLException, ClassNotFoundException;
     List<Rental> findActiveRentalsByUser(String userId) throws SQLException, ClassNotFoundException;
     List<Rental> findOverdueRentals() throws SQLException, ClassNotFoundException;
     List<Rental> findDueSoon(int days) throws SQLException, ClassNotFoundException;
@@ -25,4 +26,6 @@ public interface IRentalRepository {
     int countAll() throws SQLException, ClassNotFoundException;
     int countByFilters(String search, String userId, String rentalStatusId) 
                                throws SQLException, ClassNotFoundException;
+    int countByActiveRentalsFilters(String search, String state, Integer dueSoonDays, String fromDate, String toDate) 
+                                        throws SQLException, ClassNotFoundException;
 }
