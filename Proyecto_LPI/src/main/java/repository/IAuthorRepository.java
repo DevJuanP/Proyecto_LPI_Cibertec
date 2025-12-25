@@ -2,8 +2,10 @@ package repository;
 
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.List;
 
 import model.Author;
+import model.AuthorStatsData;
 
 public interface IAuthorRepository {
     Author findById(String authorId) throws SQLException, ClassNotFoundException;
@@ -34,4 +36,12 @@ public interface IAuthorRepository {
 
     LinkedList<Author> findAllPaginated(int offset, int limit, String search, String countryId, String statusId)
             throws SQLException, ClassNotFoundException;
+
+    List<AuthorStatsData> getMostRequestedAuthors(
+            String countryId, String statusId, int limit) 
+            throws SQLException, ClassNotFoundException;
+
+    int countAuthorsWithRentals() throws SQLException, ClassNotFoundException;
+
+    int getTotalAuthorsRentals() throws SQLException, ClassNotFoundException;
 }

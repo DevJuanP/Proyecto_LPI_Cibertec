@@ -5,11 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 import connection.DbContext;
 import model.Author;
+import model.AuthorStatsData;
 import model.Country;
 import model.Status;
 
@@ -416,6 +419,126 @@ public class AuthorRepository implements IAuthorRepository {
         try (PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
 
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public List<AuthorStatsData> getMostRequestedAuthors(
+            String countryId, String statusId, int limit) 
+            throws SQLException, ClassNotFoundException {
+        
+        StringBuilder sql = new StringBuilder(
+            """
+                SELECT 
+                    BIN_TO_UUID(a.AuthorId) as AuthorId, 
+                    a.FullName, 
+                    a.Pseudonym, 
+                    a.PhotoUrl, 
+                    c.CountryName, 
+                    COUNT(DISTINCT b.BookId) as TotalBooks, 
+                    COUNT(DISTINCT bc.BookCopyId) as TotalCopies, 
+                    SUM(CASE WHEN bcs.BookCopyStatusName = 'Disponible' THEN 1 ELSE 0 END) as AvailableCopies, 
+                    COUNT(r.RentalId) as TotalRentals 
+                FROM Author a 
+                INNER JOIN Country c ON a.CountryId = c.CountryId 
+                INNER JOIN Status s ON a.StatusId = s.StatusId 
+                LEFT JOIN Book b ON a.AuthorId = b.AuthorId 
+                LEFT JOIN BookCopy bc ON b.BookId = bc.BookId 
+                LEFT JOIN BookCopyStatus bcs ON bc.BookCopyStatusId = bcs.BookCopyStatusId 
+                LEFT JOIN Rental r ON bc.BookCopyId = r.BookCopyId 
+                WHERE 1=1    
+            """
+        );
+        
+        if (countryId != null && !countryId.trim().isEmpty()) {
+            sql.append(" AND a.CountryId = UUID_TO_BIN(?) ");
+        }
+        if (statusId != null && !statusId.trim().isEmpty()) {
+            sql.append(" AND a.StatusId = UUID_TO_BIN(?) ");
+        }
+        
+        sql.append(
+            "GROUP BY a.AuthorId, a.FullName, a.Pseudonym, c.CountryName " +
+            "HAVING TotalRentals > 0 " +
+            "ORDER BY TotalRentals DESC, a.FullName ASC " +
+            "LIMIT ?"
+        );
+        
+        ArrayList<AuthorStatsData> statsList = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (countryId != null && !countryId.trim().isEmpty()) {
+                ps.setString(paramIndex++, countryId);
+            }
+            if (statusId != null && !statusId.trim().isEmpty()) {
+                ps.setString(paramIndex++, statusId);
+            }
+            
+            ps.setInt(paramIndex, limit);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    AuthorStatsData stats = new AuthorStatsData(
+                        rs.getString("AuthorId"),
+                        rs.getString("FullName"),
+                        rs.getString("Pseudonym"),
+                        rs.getString("PhotoUrl"),
+                        rs.getString("CountryName"),
+                        rs.getInt("TotalBooks"),
+                        rs.getInt("TotalCopies"),
+                        rs.getInt("AvailableCopies"),
+                        rs.getInt("TotalRentals")
+                    );
+                    statsList.add(stats);
+                }
+            }
+        }
+        
+        return statsList;
+    }
+
+    @Override
+    public int countAuthorsWithRentals() throws SQLException, ClassNotFoundException {
+        String sql = 
+            "SELECT COUNT(DISTINCT a.AuthorId) " +
+            "FROM Author a " +
+            "INNER JOIN Book b ON a.AuthorId = b.AuthorId " +
+            "INNER JOIN BookCopy bc ON b.BookId = bc.BookId " +
+            "INNER JOIN Rental r ON bc.BookCopyId = r.BookCopyId";
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public int getTotalAuthorsRentals() throws SQLException, ClassNotFoundException {
+        String sql = 
+            "SELECT COUNT(r.RentalId) " +
+            "FROM Rental r " +
+            "INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId " +
+            "INNER JOIN Book b ON bc.BookId = b.BookId " +
+            "INNER JOIN Author a ON b.AuthorId = a.AuthorId";
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
             if (rs.next()) {
                 return rs.getInt(1);
             }

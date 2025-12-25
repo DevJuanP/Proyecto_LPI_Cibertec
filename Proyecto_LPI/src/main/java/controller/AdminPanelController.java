@@ -15,6 +15,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Author;
+import model.AuthorStatsData;
 import model.Book;
 import model.BookCopy;
 import model.BookCopyStatus;
@@ -468,8 +469,45 @@ public class AdminPanelController extends BaseServlet {
     /**
      * Carga los datos para la pagina de autores más pedidos.
      */
-    private void loadMostRequestedAuthorsData(HttpServletRequest request) {
-        // TODO: Implementar cuando exista estadí­sticas
+    private void loadMostRequestedAuthorsData(HttpServletRequest request) 
+            throws SQLException, ClassNotFoundException {
+        
+        IAuthorService authorService = getService(IAuthorService.class);
+        ICountryService countryService = getService(ICountryService.class);
+        IStatusService statusService = getService(IStatusService.class);
+        
+        String countryId = request.getParameter("countryId");
+        String statusId = request.getParameter("statusId");
+        int topLimit = getIntParameter(request, "top", 20);
+        
+        if (topLimit < 10) topLimit = 10;
+        if (topLimit > 100) topLimit = 100;
+        
+        List<AuthorStatsData> topAuthors = authorService.getMostRequestedAuthors(
+            countryId, statusId, topLimit);
+        
+        List<Country> countries = countryService.findAll();
+        List<Status> statuses = statusService.findAll();
+        
+        int totalAuthorsWithRentals = authorService.getAuthorsWithRentalsCount();
+        int totalRentals = authorService.getTotalAuthorsRentals();
+        int totalAuthors = authorService.getTotalAuthorsCount();
+        
+        double avgRentalsPerAuthor = totalAuthorsWithRentals > 0 
+            ? (double) totalRentals / totalAuthorsWithRentals 
+            : 0.0;
+        
+        request.setAttribute("topAuthors", topAuthors);
+        request.setAttribute("countries", countries);
+        request.setAttribute("statuses", statuses);
+        request.setAttribute("totalAuthorsWithRentals", totalAuthorsWithRentals);
+        request.setAttribute("totalRentals", totalRentals);
+        request.setAttribute("totalAuthors", totalAuthors);
+        request.setAttribute("avgRentalsPerAuthor", avgRentalsPerAuthor);
+        
+        request.setAttribute("countryIdValue", countryId != null ? countryId : "");
+        request.setAttribute("statusIdValue", statusId != null ? statusId : "");
+        request.setAttribute("topValue", topLimit);
     }
 
     /**

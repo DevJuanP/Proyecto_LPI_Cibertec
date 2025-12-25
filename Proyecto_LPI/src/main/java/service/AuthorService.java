@@ -8,6 +8,7 @@ import java.util.List;
 import dto.author.AuthorData;
 import dto.shared.PagedResult;
 import model.Author;
+import model.AuthorStatsData;
 import model.Status;
 import repository.IAuthorRepository;
 import repository.IStatusRepository;
@@ -84,6 +85,27 @@ public class AuthorService implements IAuthorService {
     @Override
     public ArrayList<Author> findAll() throws SQLException, ClassNotFoundException {
         return new ArrayList<>(authorRepository.findAll());
+    }
+
+    @Override
+    public List<AuthorStatsData> getMostRequestedAuthors(
+            String countryId, String statusId, int limit) 
+            throws SQLException, ClassNotFoundException {
+        
+        if (limit < 1) limit = 10;
+        if (limit > 100) limit = 100;
+        
+        return authorRepository.getMostRequestedAuthors(countryId, statusId, limit);
+    }
+
+    @Override
+    public int getAuthorsWithRentalsCount() throws SQLException, ClassNotFoundException {
+        return authorRepository.countAuthorsWithRentals();
+    }
+
+    @Override
+    public int getTotalAuthorsRentals() throws SQLException, ClassNotFoundException {
+        return authorRepository.getTotalAuthorsRentals();
     }
 
     /**
