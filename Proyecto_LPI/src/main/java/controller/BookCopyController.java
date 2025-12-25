@@ -183,7 +183,6 @@ public class BookCopyController extends BaseServlet {
         out.println("<div class=\"text-end mt-3\">");
         out.println("  <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Cerrar</button>");
         
-        // Solo mostrar botones de editar/eliminar si no está alquilado
         boolean isRented = bookCopy.getBookCopyStatus() != null && 
                           "Alquilado".equals(bookCopy.getBookCopyStatus().getBookCopyStatusName());
         
@@ -214,6 +213,16 @@ public class BookCopyController extends BaseServlet {
         
         if (bookCopy == null) {
             request.getSession().setAttribute("error", "Ejemplar no encontrado");
+            response.sendRedirect(request.getContextPath() + ADMIN_PANEL);
+            return;
+        }
+        
+        boolean isRented = bookCopy.getBookCopyStatus() != null && 
+                          "Alquilado".equals(bookCopy.getBookCopyStatus().getBookCopyStatusName());
+        
+        if (isRented) {
+            request.getSession().setAttribute("error", 
+                "No se puede editar un ejemplar que está actualmente alquilado");
             response.sendRedirect(request.getContextPath() + ADMIN_PANEL);
             return;
         }
@@ -272,6 +281,16 @@ public class BookCopyController extends BaseServlet {
         
         if (bookCopy == null) {
             request.getSession().setAttribute("error", "Ejemplar no encontrado");
+            response.sendRedirect(request.getContextPath() + ADMIN_PANEL);
+            return;
+        }
+        
+        boolean isRented = bookCopy.getBookCopyStatus() != null && 
+                          "Alquilado".equals(bookCopy.getBookCopyStatus().getBookCopyStatusName());
+        
+        if (isRented) {
+            request.getSession().setAttribute("error", 
+                "No se puede actualizar un ejemplar que está actualmente alquilado");
             response.sendRedirect(request.getContextPath() + ADMIN_PANEL);
             return;
         }

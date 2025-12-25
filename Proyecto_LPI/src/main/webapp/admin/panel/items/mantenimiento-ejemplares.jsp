@@ -192,9 +192,11 @@
                             <c:forEach var="copy" items="${copiesResult.items}">
                                 <tr>
                                     <td>
-                                        <input type="checkbox" class="form-check-input copy-checkbox" 
+                                        <c:if test="${copy.bookCopyStatus.bookCopyStatusName != 'Alquilado'}">
+                                            <input type="checkbox" class="form-check-input copy-checkbox" 
                                                value="${copy.bookCopyId}"
                                                data-status="${copy.bookCopyStatus.bookCopyStatusName}">
+                                        </c:if>                                        
                                     </td>
                                     <td>
                                         <code class="text-muted" style="font-size: 0.85em;">

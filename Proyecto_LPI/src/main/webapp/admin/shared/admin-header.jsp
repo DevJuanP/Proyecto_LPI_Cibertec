@@ -22,23 +22,6 @@
         
         <!-- Navbar Items -->
         <div class="d-flex align-items-center ms-auto">
-            <!-- Notifications -->
-            <div class="dropdown me-3">
-                <button class="btn btn-dark position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown">
-                    <i class="bi bi-bell fs-5"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        3
-                    </span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
-                    <li><h6 class="dropdown-header">Notificaciones</h6></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>Nuevo alquiler registrado</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-exclamation-triangle me-2"></i>Libro próximo a vencer</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-check-circle me-2"></i>Devolución completada</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-center" href="#">Ver todas</a></li>
-                </ul>
-            </div>
             
             <!-- User Profile -->
             <div class="dropdown">
