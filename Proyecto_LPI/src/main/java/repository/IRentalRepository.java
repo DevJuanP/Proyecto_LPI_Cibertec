@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import model.BookRentalStats;
 import model.Rental;
 
 public interface IRentalRepository {
@@ -28,4 +29,7 @@ public interface IRentalRepository {
                                throws SQLException, ClassNotFoundException;
     int countByActiveRentalsFilters(String search, String state, Integer dueSoonDays, String fromDate, String toDate) 
                                         throws SQLException, ClassNotFoundException;
+    List<BookRentalStats> getMostRequestedBooks(int offset, int pageSize, String categoryId) 
+                                        throws SQLException, ClassNotFoundException;
+    int countMostRequestedBooks(String categoryId) throws SQLException, ClassNotFoundException;
 }

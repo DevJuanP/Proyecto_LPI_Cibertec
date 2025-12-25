@@ -18,6 +18,7 @@ import model.Author;
 import model.Book;
 import model.BookCopy;
 import model.BookCopyStatus;
+import model.BookRentalStats;
 import model.BookStatus;
 import model.Category;
 import model.Country;
@@ -446,8 +447,22 @@ public class AdminPanelController extends BaseServlet {
     /**
      * Carga los datos para la página de libros más pedidos.
      */
-    private void loadMostRequestedBooksData(HttpServletRequest request) {
-        // TODO: Implementar cuando exista BookService
+    private void loadMostRequestedBooksData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        IRentalService rentalService = getService(IRentalService.class);
+        ICategoryService categoryService = getService(ICategoryService.class);
+        
+        int currentPage = getIntParameter(request, "p", 1);
+        int pageSize = getIntParameter(request, "size", 20);
+        String categoryId = request.getParameter("categoryId");
+        
+        PagedResult<BookRentalStats> booksStats = rentalService.getMostRequestedBooks(
+            currentPage, pageSize, categoryId);
+        
+        List<Category> categories = categoryService.findAll();
+        
+        request.setAttribute("booksStats", booksStats);
+        request.setAttribute("categories", categories);
+        request.setAttribute("categoryIdValue", categoryId != null ? categoryId : "");
     }
 
     /**

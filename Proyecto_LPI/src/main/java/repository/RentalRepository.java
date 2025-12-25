@@ -9,6 +9,7 @@ import model.Author;
 import model.Category;
 import model.BookStatus;
 import model.BookCopyStatus;
+import model.BookRentalStats;
 import model.RentalStatus;
 import model.Country;
 import model.Status;
@@ -565,6 +566,108 @@ public class RentalRepository implements IRentalRepository {
             
             if (rs.next()) {
                 return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public List<BookRentalStats> getMostRequestedBooks(int offset, int pageSize, String categoryId) 
+            throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder("""
+            SELECT 
+                BIN_TO_UUID(b.BookId) as BookId, 
+                b.ISBN, 
+                b.Title, 
+                a.FullName as AuthorName, 
+                c.CategoryName, 
+                COUNT(r.RentalId) as TotalRentals, 
+                SUM(CASE WHEN DATE(r.RentalDate) = CURDATE() - INTERVAL 1 DAY THEN 1 ELSE 0 END) as YesterdayRentals, 
+                SUM(CASE WHEN DATE(r.RentalDate) = CURDATE() THEN 1 ELSE 0 END) as TodayRentals 
+            FROM Rental r 
+            INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId 
+            INNER JOIN Book b ON bc.BookId = b.BookId 
+            INNER JOIN Author a ON b.AuthorId = a.AuthorId 
+            INNER JOIN Category c ON b.CategoryId = c.CategoryId 
+        """);
+        
+        if (categoryId != null && !categoryId.isEmpty()) {
+            sql.append("WHERE b.CategoryId = UUID_TO_BIN(?) ");
+        }
+        
+        sql.append("GROUP BY b.BookId, b.ISBN, b.Title, a.FullName, c.CategoryName ");
+        sql.append("ORDER BY TotalRentals DESC ");
+        sql.append("LIMIT ? OFFSET ? ");
+        
+        List<BookRentalStats> stats = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            if (categoryId != null && !categoryId.isEmpty()) {
+                ps.setString(paramIndex++, categoryId);
+            }
+            
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex, offset);
+            
+            ResultSet rs = ps.executeQuery();
+            
+            int maxRentals = 0;
+            List<BookRentalStats> tempList = new ArrayList<>();
+            
+            while (rs.next()) {
+                BookRentalStats stat = new BookRentalStats();
+                stat.setBookId(rs.getString("BookId"));
+                stat.setIsbn(rs.getString("ISBN"));
+                stat.setTitle(rs.getString("Title"));
+                stat.setAuthorName(rs.getString("AuthorName"));
+                stat.setCategoryName(rs.getString("CategoryName"));
+                stat.setTotalRentals(rs.getInt("TotalRentals"));
+                stat.setYesterdayRentals(rs.getInt("YesterdayRentals"));
+                stat.setTodayRentals(rs.getInt("TodayRentals"));
+                
+                if (stat.getTotalRentals() > maxRentals) {
+                    maxRentals = stat.getTotalRentals();
+                }
+                
+                tempList.add(stat);
+            }
+            
+            for (BookRentalStats stat : tempList) {
+                stat.calculateTrend();
+                stat.calculatePopularity(maxRentals);
+                stats.add(stat);
+            }
+            
+            return stats;
+        }
+    }
+
+    @Override
+    public int countMostRequestedBooks(String categoryId) throws SQLException, ClassNotFoundException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(DISTINCT b.BookId) as Total ");
+        sql.append("FROM Rental r ");
+        sql.append("INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId ");
+        sql.append("INNER JOIN Book b ON bc.BookId = b.BookId ");
+        
+        if (categoryId != null && !categoryId.isEmpty()) {
+            sql.append("WHERE b.CategoryId = UUID_TO_BIN(?) ");
+        }
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            if (categoryId != null && !categoryId.isEmpty()) {
+                ps.setString(1, categoryId);
+            }
+            
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("Total");
             }
             return 0;
         }

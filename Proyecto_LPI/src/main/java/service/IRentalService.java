@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dto.shared.PagedResult;
+import model.BookRentalStats;
 import model.Rental;
 import model.RentalStatus;
 
@@ -32,6 +33,9 @@ public interface IRentalService {
     List<Rental> findDueSoonRentals(int days) throws SQLException, ClassNotFoundException;
     
     List<RentalStatus> getAllRentalStatuses() throws SQLException, ClassNotFoundException;
+
+    PagedResult<BookRentalStats> getMostRequestedBooks(int page, int pageSize, String categoryId) 
+                                throws SQLException, ClassNotFoundException;
     
     BigDecimal getDefaultDailyRate();
 }

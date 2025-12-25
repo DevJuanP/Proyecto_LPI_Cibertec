@@ -8,6 +8,7 @@ import dto.shared.PagedResult;
 import model.Rental;
 import model.RentalStatus;
 import model.BookCopy;
+import model.BookRentalStats;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -212,6 +213,20 @@ public class RentalService implements IRentalService {
     @Override
     public BigDecimal getDefaultDailyRate() {
         return DEFAULT_DAILY_RATE;
+    }
+
+    @Override
+    public PagedResult<BookRentalStats> getMostRequestedBooks(int page, int pageSize, String categoryId) 
+                                throws SQLException, ClassNotFoundException {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 20;
+        
+        int offset = (page - 1) * pageSize;
+        
+        List<BookRentalStats> items = rentalRepository.getMostRequestedBooks(offset, pageSize, categoryId);
+        int totalItems = rentalRepository.countMostRequestedBooks(categoryId);
+        
+        return new PagedResult<>(items, page, pageSize, totalItems);
     }
 
     private String getRentedBookCopyStatusId() throws SQLException, ClassNotFoundException {
