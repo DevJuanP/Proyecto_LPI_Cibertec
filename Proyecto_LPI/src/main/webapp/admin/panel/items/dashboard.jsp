@@ -162,11 +162,11 @@
                                         <c:when test="${status.index == 2}">bg-info</c:when>
                                         <c:otherwise>bg-success</c:otherwise>
                                     </c:choose>
-                                    text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                    text-white rounded-circle d-flex align-items-center justify-content-center ps-3 pe-3" 
                                      style="width: 40px; height: 40px;">
                                     <strong>${status.index + 1}</strong>
                                 </div>
-                                <div class="flex-grow-1">
+                                <div class="flex-grow-1 ps-2">
                                     <h6 class="mb-0"><c:out value="${book.title}"/></h6>
                                     <small class="text-muted">${book.rentalCount} alquileres</small>
                                 </div>

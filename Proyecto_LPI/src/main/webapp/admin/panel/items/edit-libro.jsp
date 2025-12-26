@@ -114,12 +114,12 @@
                             <label for="categoryId" class="form-label">Categoría</label>
                             <select class="form-select" id="categoryId" name="categoryId">
                                 <option value="">Seleccionar categoría...</option>
-                                <%-- TODO: Agregar lista de categorías cuando esté disponible --%>
-                                <c:if test="${not empty libro.category}">
-                                    <option value="${libro.categoryId}" selected>
-                                        ${libro.category.categoryName}
+                                <c:forEach var="category" items="${categories}">
+                                    <option value="${category.categoryId}" 
+                                            ${category.categoryId == libro.categoryId ? 'selected' : ''}>
+                                        ${category.categoryName}
                                     </option>
-                                </c:if>
+                                </c:forEach>
                             </select>
                             <div class="form-text">Opcional: clasificación del libro</div>
                         </div>

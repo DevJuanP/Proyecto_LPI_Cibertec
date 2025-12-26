@@ -279,15 +279,42 @@
                                     <i class="bi bi-chevron-left"></i> Anterior
                                 </a>
                             </li>
-
-                            <c:forEach begin="${rentalsResult.startPage}" end="${rentalsResult.endPage}" var="pageNum">
-                                <li class="page-item ${rentalsResult.currentPage == pageNum ? 'active' : ''}">
+                            
+                            <%-- Números de página --%>
+                            <c:set var="pageRange" value="${rentalsResult.getPageRange(5)}" />
+                            
+                            <c:if test="${pageRange[0] > 1}">
+                                <li class="page-item">
                                     <a class="page-link" 
-                                       href="${pageContext.request.contextPath}/admin/panel?page=alquileres&p=${pageNum}&search=${searchValue}&userId=${userIdValue}&rentalStatusId=${rentalStatusIdValue}">
-                                        ${pageNum}
+                                       href="${pageContext.request.contextPath}/admin/panel?page=alquileres&p=1&search=${searchValue}&userId=${userIdValue}&rentalStatusId=${rentalStatusIdValue}">
+                                        1
+                                    </a>
+                                </li>
+                                <c:if test="${pageRange[0] > 2}">
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                </c:if>
+                            </c:if>
+
+                            <c:forEach begin="${pageRange[0]}" end="${pageRange[1]}" var="i">
+                                <li class="page-item ${i == rentalsResult.currentPage ? 'active' : ''}">
+                                    <a class="page-link" 
+                                       href="${pageContext.request.contextPath}/admin/panel?page=alquileres&p=${i}&search=${searchValue}&userId=${userIdValue}&rentalStatusId=${rentalStatusIdValue}">
+                                        ${i}
                                     </a>
                                 </li>
                             </c:forEach>
+                            
+                            <c:if test="${pageRange[1] < rentalsResult.totalPages}">
+                                <c:if test="${pageRange[1] < rentalsResult.totalPages - 1}">
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                </c:if>
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="${pageContext.request.contextPath}/admin/panel?page=alquileres&p=${rentalsResult.totalPages}&search=${searchValue}&userId=${userIdValue}&rentalStatusId=${rentalStatusIdValue}">
+                                        ${rentalsResult.totalPages}
+                                    </a>
+                                </li>
+                            </c:if>
 
                             <li class="page-item ${rentalsResult.currentPage == rentalsResult.totalPages ? 'disabled' : ''}">
                                 <a class="page-link" 
@@ -468,7 +495,6 @@
 <jsp:useBean id="now" class="java.util.Date"/>
 
 <script>
-    // Calculate total cost
     function calculateTotal() {
         const rentalDays = parseInt(document.querySelector('[name="rentalDays"]').value) || 0;
         const dailyRate = parseFloat(document.getElementById('dailyRate').value) || 0;
@@ -476,12 +502,10 @@
         document.getElementById('totalCostDisplay').value = 'S/ ' + totalCost;
     }
 
-    // Initialize calculation on page load
     document.addEventListener('DOMContentLoaded', function() {
         calculateTotal();
     });
 
-    // View rental details
     function viewRental(rentalId) {
         const modal = new bootstrap.Modal(document.getElementById('rentalDetailModal'));
         document.getElementById('rentalDetailContent').innerHTML = 
@@ -499,21 +523,18 @@
             });
     }
 
-    // Mark as returned
     function markAsReturned(rentalId) {
         document.getElementById('markReturnedRentalId').value = rentalId;
         const modal = new bootstrap.Modal(document.getElementById('markReturnedModal'));
         modal.show();
     }
 
-    // Cancel rental
     function cancelRental(rentalId) {
         document.getElementById('cancelRentalId').value = rentalId;
         const modal = new bootstrap.Modal(document.getElementById('cancelRentalModal'));
         modal.show();
     }
 
-    // Form validation
     const addRentalForm = document.getElementById('addRentalForm');
     if (addRentalForm) {
         addRentalForm.addEventListener('submit', function(event) {
