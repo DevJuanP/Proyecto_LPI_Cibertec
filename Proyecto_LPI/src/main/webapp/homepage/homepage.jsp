@@ -10,14 +10,24 @@
 			<jsp:include page="carrusel.jsp"></jsp:include>
 		</section>
 		<section class="container">
-			<h1 class="display-4 fw-bold text-center mb-4">Misterio</h1>
-			<jsp:include page="cards.jsp"></jsp:include>
-			<h1 class="display-4 fw-bold text-center mb-4">Accion</h1>
-			<jsp:include page="cards.jsp"></jsp:include>
-			<h1 class="display-4 fw-bold text-center mb-4">Romance</h1>
-			<jsp:include page="cards.jsp"></jsp:include>
 
-		</section>
+    <h1 class="display-5 fw-bold text-center mb-4">Misterio</h1>
+    <jsp:include page="cards.jsp">
+        <jsp:param name="listaLibros" value="${misterio}" />
+    </jsp:include>
+
+    <h1 class="display-5 fw-bold text-center mb-4">Acción</h1>
+    <jsp:include page="cards.jsp">
+        <jsp:param name="listaLibros" value="${accion}" />
+    </jsp:include>
+
+    <h1 class="display-5 fw-bold text-center mb-4">Romance</h1>
+    <jsp:include page="cards.jsp">
+        <jsp:param name="listaLibros" value="${romance}" />
+    </jsp:include>
+
+</section>
+
 	</main>
 
 	<jsp:include page="../footer.jsp"></jsp:include>
