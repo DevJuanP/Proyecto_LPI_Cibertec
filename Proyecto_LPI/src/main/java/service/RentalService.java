@@ -229,6 +229,20 @@ public class RentalService implements IRentalService {
         return new PagedResult<>(items, page, pageSize, totalItems);
     }
 
+    @Override
+    public List<Rental> getRecentRentals(int limit) throws SQLException, ClassNotFoundException {
+        if (limit < 1) limit = 5;
+        if (limit > 50) limit = 50;
+        return rentalRepository.findRecentRentals(limit);
+    }
+    
+    @Override
+    public List<BookRentalStats> getTopRequestedBooks(int limit) throws SQLException, ClassNotFoundException {
+        if (limit < 1) limit = 5;
+        if (limit > 20) limit = 20;
+        return rentalRepository.findTopRequestedBooks(limit);
+    }
+
     private String getRentedBookCopyStatusId() throws SQLException, ClassNotFoundException {
         return bookCopyStatusRepository.findByName("Alquilado").getBookCopyStatusId();
     }

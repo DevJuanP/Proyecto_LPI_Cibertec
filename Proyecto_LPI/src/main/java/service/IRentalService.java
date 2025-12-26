@@ -36,6 +36,9 @@ public interface IRentalService {
 
     PagedResult<BookRentalStats> getMostRequestedBooks(int page, int pageSize, String categoryId) 
                                 throws SQLException, ClassNotFoundException;
-    
+
+    List<Rental> getRecentRentals(int limit) throws SQLException, ClassNotFoundException;
+    List<BookRentalStats> getTopRequestedBooks(int limit) throws SQLException, ClassNotFoundException;
+
     BigDecimal getDefaultDailyRate();
 }

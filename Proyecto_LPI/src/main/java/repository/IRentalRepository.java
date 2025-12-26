@@ -32,4 +32,6 @@ public interface IRentalRepository {
     List<BookRentalStats> getMostRequestedBooks(int offset, int pageSize, String categoryId) 
                                         throws SQLException, ClassNotFoundException;
     int countMostRequestedBooks(String categoryId) throws SQLException, ClassNotFoundException;
+    List<Rental> findRecentRentals(int limit) throws SQLException, ClassNotFoundException;
+    List<BookRentalStats> findTopRequestedBooks(int limit) throws SQLException, ClassNotFoundException;
 }

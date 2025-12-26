@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ page import="java.time.LocalDateTime" %>
+<%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.temporal.ChronoUnit" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <jsp:useBean id="activeRentals" type="dto.shared.PagedResult" scope="request" />
@@ -15,8 +15,8 @@
 <c:set var="dateFromValue" value="${dateFromValue != null ? dateFromValue : ''}" />
 <c:set var="dateToValue" value="${dateToValue != null ? dateToValue : ''}" />
 <%
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    LocalDateTime now = LocalDateTime.now();
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    LocalDate now = LocalDate.now();
 %>
 
 <div class="content-header">
@@ -176,7 +176,7 @@
                                         statusLabel = "Vencido";
                                         statusClass = "bg-danger";
                                         daysClass = "bg-danger";
-                                        daysText = Math.abs(daysRemaining) + " días atrasado";
+                                        daysText = Math.abs(daysRemaining) > 1 ? Math.abs(daysRemaining) + " días atrasado" : "1 día atrasado";
                                     } else if (daysRemaining == 0) {
                                         daysText = "Hoy";
                                         daysClass = "bg-warning";

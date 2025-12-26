@@ -157,7 +157,7 @@ public class RentalRepository implements IRentalRepository {
             sql.append(" AND ").append(String.join(" AND ", conditions));
         }
         
-        sql.append(" ORDER BY r.DueDate DESC LIMIT ? OFFSET ?");
+        sql.append(" ORDER BY r.DueDate ASC LIMIT ? OFFSET ?");
         
         LinkedList<Rental> rentals = new LinkedList<>();
         Connection conn = dbContext.getConnection();
@@ -576,14 +576,14 @@ public class RentalRepository implements IRentalRepository {
             throws SQLException, ClassNotFoundException {
         StringBuilder sql = new StringBuilder("""
             SELECT 
-                BIN_TO_UUID(b.BookId) as BookId, 
+                BIN_TO_UUID(b.BookId) AS BookId, 
                 b.ISBN, 
                 b.Title, 
-                a.FullName as AuthorName, 
+                a.FullName AS AuthorName, 
                 c.CategoryName, 
-                COUNT(r.RentalId) as TotalRentals, 
-                SUM(CASE WHEN DATE(r.RentalDate) = CURDATE() - INTERVAL 1 DAY THEN 1 ELSE 0 END) as YesterdayRentals, 
-                SUM(CASE WHEN DATE(r.RentalDate) = CURDATE() THEN 1 ELSE 0 END) as TodayRentals 
+                COUNT(r.RentalId) AS TotalRentals, 
+                SUM(CASE WHEN DATE(CONVERT_TZ(r.RentalDate, 'UTC', 'America/Lima')) = DATE(CONVERT_TZ(NOW(), 'UTC', 'America/Lima')) - INTERVAL 1 DAY THEN 1 ELSE 0 END) AS YesterdayRentals, 
+                SUM(CASE WHEN DATE(CONVERT_TZ(r.RentalDate, 'UTC', 'America/Lima')) = DATE(CONVERT_TZ(NOW(), 'UTC', 'America/Lima')) THEN 1 ELSE 0 END) AS TodayRentals 
             FROM Rental r 
             INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId 
             INNER JOIN Book b ON bc.BookId = b.BookId 
@@ -671,6 +671,62 @@ public class RentalRepository implements IRentalRepository {
             }
             return 0;
         }
+    }
+
+    @Override
+    public List<Rental> findRecentRentals(int limit) throws SQLException, ClassNotFoundException {
+        String sql = buildSelectQuery() + 
+                     " ORDER BY r.RentalDate DESC " +
+                     " LIMIT ?";
+        
+        List<Rental> rentals = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                rentals.add(mapResultSetToRental(rs));
+            }
+        }
+        return rentals;
+    }
+    
+    @Override
+    public List<BookRentalStats> findTopRequestedBooks(int limit) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT " +
+                     "    BIN_TO_UUID(b.BookId) AS BookId, " +
+                     "    b.Title, " +
+                     "    BIN_TO_UUID(a.AuthorId) AS AuthorId, " +
+                     "    a.FullName AS AuthorName, " +
+                     "    COUNT(r.RentalId) AS RentalCount " +
+                     "FROM Rental r " +
+                     "INNER JOIN BookCopy bc ON r.BookCopyId = bc.BookCopyId " +
+                     "INNER JOIN Book b ON bc.BookId = b.BookId " +
+                     "INNER JOIN Author a ON b.AuthorId = a.AuthorId " +
+                     "GROUP BY b.BookId, b.Title, a.AuthorId, a.FullName " +
+                     "ORDER BY RentalCount DESC " +
+                     "LIMIT ?";
+        
+        List<BookRentalStats> stats = new ArrayList<>();
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                BookRentalStats stat = new BookRentalStats();
+                stat.setBookId(rs.getString("BookId"));
+                stat.setTitle(rs.getString("Title"));
+                stat.setAuthorId(rs.getString("AuthorId"));
+                stat.setAuthorName(rs.getString("AuthorName"));
+                stat.setRentalCount(rs.getInt("RentalCount"));
+                stats.add(stat);
+            }
+        }
+        return stats;
     }
 
     private String buildSelectQuery() {
@@ -788,14 +844,14 @@ public class RentalRepository implements IRentalRepository {
         book.setAuthorId(rs.getString("AuthorId"));
         book.setCategoryId(rs.getString("CategoryId"));
         
-        int publicationYear = rs.getInt("PublicationYear");
+        Integer publicationYear = rs.getInt("PublicationYear");
         if (!rs.wasNull()) {
             book.setPublicationYear(publicationYear);
         }
         
         book.setPublisher(rs.getString("Publisher"));
         
-        int pages = rs.getInt("Pages");
+        Integer pages = rs.getInt("Pages");
         if (!rs.wasNull()) {
             book.setPages(pages);
         }

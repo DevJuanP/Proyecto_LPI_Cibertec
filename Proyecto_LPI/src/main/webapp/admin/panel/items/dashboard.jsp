@@ -1,4 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="util.DateUtil" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <div class="content-header">
     <h2 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
     <p class="text-muted mb-0">Resumen general del sistema</p>
@@ -12,13 +15,13 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Total Libros</h6>
-                        <h3 class="mb-0">1,248</h3>
+                        <h3 class="mb-0"><c:out value="${totalBooks}" default="0"/></h3>
                     </div>
                     <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
                         <i class="bi bi-book fs-2 text-primary"></i>
                     </div>
                 </div>
-                <small class="text-success"><i class="bi bi-arrow-up"></i> 12% este mes</small>
+                <small class="text-muted">Registrados en el sistema</small>
             </div>
         </div>
     </div>
@@ -29,13 +32,13 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">En Alquiler</h6>
-                        <h3 class="mb-0">342</h3>
+                        <h3 class="mb-0"><c:out value="${rentedCopies}" default="0"/></h3>
                     </div>
                     <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
                         <i class="bi bi-bookmark-check fs-2 text-warning"></i>
                     </div>
                 </div>
-                <small class="text-info"><i class="bi bi-arrow-right"></i> 85 hoy</small>
+                <small class="text-muted">Ejemplares alquilados</small>
             </div>
         </div>
     </div>
@@ -46,13 +49,13 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Autores</h6>
-                        <h3 class="mb-0">456</h3>
+                        <h3 class="mb-0"><c:out value="${totalAuthors}" default="0"/></h3>
                     </div>
                     <div class="bg-success bg-opacity-10 p-3 rounded-circle">
                         <i class="bi bi-people fs-2 text-success"></i>
                     </div>
                 </div>
-                <small class="text-success"><i class="bi bi-arrow-up"></i> 8 nuevos</small>
+                <small class="text-muted">Registrados en el sistema</small>
             </div>
         </div>
     </div>
@@ -63,13 +66,13 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Disponibles</h6>
-                        <h3 class="mb-0">906</h3>
+                        <h3 class="mb-0"><c:out value="${availableCopies}" default="0"/></h3>
                     </div>
                     <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
                         <i class="bi bi-box-seam fs-2 text-danger"></i>
                     </div>
                 </div>
-                <small class="text-muted"><i class="bi bi-dash"></i> Sin cambios</small>
+                <small class="text-muted">Ejemplares disponibles</small>
             </div>
         </div>
     </div>
@@ -94,36 +97,47 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><strong>Cien Años de Soledad</strong></td>
-                                <td>Juan Pérez</td>
-                                <td>02/12/2025</td>
-                                <td><span class="badge bg-success">Activo</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>El Quijote</strong></td>
-                                <td>María García</td>
-                                <td>01/12/2025</td>
-                                <td><span class="badge bg-success">Activo</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>La Odisea</strong></td>
-                                <td>Carlos López</td>
-                                <td>30/11/2025</td>
-                                <td><span class="badge bg-warning">Por vencer</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>1984</strong></td>
-                                <td>Ana Martínez</td>
-                                <td>28/11/2025</td>
-                                <td><span class="badge bg-danger">Vencido</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>El Principito</strong></td>
-                                <td>Pedro Sánchez</td>
-                                <td>27/11/2025</td>
-                                <td><span class="badge bg-success">Activo</span></td>
-                            </tr>
+                            <c:choose>
+                                <c:when test="${not empty recentRentals}">
+                                    <c:forEach var="rental" items="${recentRentals}">
+                                        <tr>
+                                            <td><strong><c:out value="${rental.bookCopy.book.title}"/></strong></td>
+                                            <td><c:out value="${rental.user.email}"/></td>
+                                            <td>
+                                                <c:set var="currentRental" value="${rental}" scope="page"/>
+                                                <% 
+                                                    model.Rental r = (model.Rental) pageContext.getAttribute("currentRental");
+                                                    out.print(DateUtil.formatDate(r.getRentalDate()));
+                                                %>
+                                            </td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${rental.rentalStatus.rentalStatusName == 'En Proceso'}">
+                                                        <span class="badge bg-success">Activo</span>
+                                                    </c:when>
+                                                    <c:when test="${rental.rentalStatus.rentalStatusName == 'Devuelto'}">
+                                                        <span class="badge bg-secondary">Devuelto</span>
+                                                    </c:when>
+                                                    <c:when test="${rental.rentalStatus.rentalStatusName == 'Cancelado'}">
+                                                        <span class="badge bg-danger">Cancelado</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="badge bg-info"><c:out value="${rental.rentalStatus.rentalStatusName}"/></span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            <i class="bi bi-inbox fs-3"></i>
+                                            <p class="mb-0">No hay alquileres recientes</p>
+                                        </td>
+                                    </tr>
+                                </c:otherwise>
+                            </c:choose>
                         </tbody>
                     </table>
                 </div>
@@ -137,49 +151,35 @@
                 <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Más Populares</h5>
             </div>
             <div class="card-body">
-                <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
-                    <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                         style="width: 40px; height: 40px;">
-                        <strong>1</strong>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">Cien Años de Soledad</h6>
-                        <small class="text-muted">156 alquileres</small>
-                    </div>
-                </div>
-                
-                <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
-                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                         style="width: 40px; height: 40px;">
-                        <strong>2</strong>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">El Quijote</h6>
-                        <small class="text-muted">142 alquileres</small>
-                    </div>
-                </div>
-                
-                <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
-                    <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                         style="width: 40px; height: 40px;">
-                        <strong>3</strong>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">1984</h6>
-                        <small class="text-muted">138 alquileres</small>
-                    </div>
-                </div>
-                
-                <div class="d-flex align-items-center p-2 bg-light rounded">
-                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                         style="width: 40px; height: 40px;">
-                        <strong>4</strong>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">La Odisea</h6>
-                        <small class="text-muted">125 alquileres</small>
-                    </div>
-                </div>
+                <c:choose>
+                    <c:when test="${not empty topBooks}">
+                        <c:forEach var="book" items="${topBooks}" varStatus="status">
+                            <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                                <div class="
+                                    <c:choose>
+                                        <c:when test="${status.index == 0}">bg-warning</c:when>
+                                        <c:when test="${status.index == 1}">bg-secondary</c:when>
+                                        <c:when test="${status.index == 2}">bg-info</c:when>
+                                        <c:otherwise>bg-success</c:otherwise>
+                                    </c:choose>
+                                    text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px;">
+                                    <strong>${status.index + 1}</strong>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0"><c:out value="${book.title}"/></h6>
+                                    <small class="text-muted">${book.rentalCount} alquileres</small>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-3"></i>
+                            <p class="mb-0">No hay datos de alquileres</p>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>

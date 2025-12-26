@@ -10,11 +10,13 @@ public class BookRentalStats {
     private String bookId;
     private String isbn;
     private String title;
+    private String authorId;
     private String authorName;
     private String categoryName;
     private int totalRentals;
     private int yesterdayRentals;
     private int todayRentals;
+    private Integer rentalCount;
     private BigDecimal trendPercentage;
     private BigDecimal popularityPercentage;
     
@@ -56,6 +58,22 @@ public class BookRentalStats {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
+    }
+
+    public void setRentalCount(int rentalCount) {
+        this.rentalCount = rentalCount;
+    }
+
+    public Integer getRentalCount() {
+        return this.rentalCount;
     }
 
     public String getAuthorName() {

@@ -27,4 +27,7 @@ public interface IBookCopyService {
     String getDiscontinuedStatusId() throws SQLException, ClassNotFoundException;
     PagedResult<BookCopy> getRegisteredBookCopies(int page, int pageSize, String search, 
             String bookId, String bookStatusId) throws SQLException, ClassNotFoundException;
+    int getTotalBookCopiesCount() throws SQLException, ClassNotFoundException;
+    int getAvailableBookCopiesCount() throws SQLException, ClassNotFoundException;
+    int getRentedBookCopiesCount() throws SQLException, ClassNotFoundException;
 }

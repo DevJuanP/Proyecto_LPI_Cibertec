@@ -161,4 +161,21 @@ public class BookCopyService implements IBookCopyService {
     public String getDiscontinuedStatusId() throws SQLException, ClassNotFoundException {
         return bookCopyStatusRepository.findByName("Descontinuado").getBookCopyStatusId();
     }
+
+    @Override
+    public int getTotalBookCopiesCount() throws SQLException, ClassNotFoundException {
+        return bookCopyRepository.count(null, null, null);
+    }
+    
+    @Override
+    public int getAvailableBookCopiesCount() throws SQLException, ClassNotFoundException {
+        String availableStatusId = bookCopyStatusRepository.findByName("Disponible").getBookCopyStatusId();
+        return bookCopyRepository.findByStatus(availableStatusId).size();
+    }
+    
+    @Override
+    public int getRentedBookCopiesCount() throws SQLException, ClassNotFoundException {
+        String rentedStatusId = bookCopyStatusRepository.findByName("Alquilado").getBookCopyStatusId();
+        return bookCopyRepository.findByStatus(rentedStatusId).size();
+    }
 }

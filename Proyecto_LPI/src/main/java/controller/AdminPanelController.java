@@ -515,11 +515,25 @@ public class AdminPanelController extends BaseServlet {
      */
     private void loadDashboardData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
         IAuthorService authorService = getService(IAuthorService.class);
+        IBookService bookService = getService(IBookService.class);
+        IBookCopyService bookCopyService = getService(IBookCopyService.class);
+        IRentalService rentalService = getService(IRentalService.class);
         
-        // Estadí­sticas básicas
-        request.setAttribute("totalAuthors", authorService.getTotalAuthorsCount());
+        int totalBooks = bookService.getTotalBooksCount();
+        int totalAuthors = authorService.getTotalAuthorsCount();
+        int rentedCopies = bookCopyService.getRentedBookCopiesCount();
+        int availableCopies = bookCopyService.getAvailableBookCopiesCount();
         
-        // TODO: Agregar más estadí­sticas cuando existan los servicios
+        List<Rental> recentRentals = rentalService.getRecentRentals(10);
+        
+        List<BookRentalStats> topBooks = rentalService.getTopRequestedBooks(5);
+        
+        request.setAttribute("totalBooks", totalBooks);
+        request.setAttribute("totalAuthors", totalAuthors);
+        request.setAttribute("rentedCopies", rentedCopies);
+        request.setAttribute("availableCopies", availableCopies);
+        request.setAttribute("recentRentals", recentRentals);
+        request.setAttribute("topBooks", topBooks);
     }
 
     /**
