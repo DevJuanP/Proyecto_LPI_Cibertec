@@ -546,6 +546,25 @@ public class AuthorRepository implements IAuthorRepository {
         }
     }
 
+    @Override
+    public int countAuthorsWithBooks() throws SQLException, ClassNotFoundException {
+        String sql = 
+            "SELECT COUNT(DISTINCT a.AuthorId) " +
+            "FROM Author a " +
+            "INNER JOIN Book b ON a.AuthorId = b.AuthorId";
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
     private Author mapResultSetToAuthor(ResultSet rs) throws SQLException {
         Author author = new Author();
         author.setAuthorId(rs.getString("AuthorId"));

@@ -108,6 +108,11 @@ public class AuthorService implements IAuthorService {
         return authorRepository.getTotalAuthorsRentals();
     }
 
+    @Override
+    public int getAuthorsWithBooksCount() throws SQLException, ClassNotFoundException {
+        return authorRepository.countAuthorsWithBooks();
+    }
+
     /**
      * Mapea un Author a AuthorData DTO.
      */

@@ -44,4 +44,6 @@ public interface IAuthorRepository {
     int countAuthorsWithRentals() throws SQLException, ClassNotFoundException;
 
     int getTotalAuthorsRentals() throws SQLException, ClassNotFoundException;
+
+    int countAuthorsWithBooks() throws SQLException, ClassNotFoundException;
 }

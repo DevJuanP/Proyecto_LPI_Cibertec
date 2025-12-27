@@ -1,0 +1,51 @@
+@startuml Arquitectura Biblioteca Virtual
+
+skinparam componentStyle rectangle
+skinparam defaultFontSize 14
+skinparam ArrowThickness 2
+
+' Presentation Layer
+component "**Controller**\n(Servlets)" as CTRL #LightBlue
+
+' Business Layer  
+component "**Service**\n(Lógica de negocio)" as SRV #LightGreen
+
+' Data Layer
+component "**Repository**\n(Acceso a datos)" as REPO #LightCoral
+
+' Infrastructure
+component "**Connection**\n(DB Connection)" as CONN #LightYellow
+
+' Data Objects
+component "**DTO**\n(Transfer Objects)" as DTO #Lavender
+component "**Model**\n(Entidades)" as MODEL #Lavender
+
+' Core & Utils
+component "**Core**\n(AppStartup, ServiceContainer)" as CORE #LightGray
+component "**Util**\n(Utilidades comunes)" as UTIL #LightGray
+
+' Database
+database "**MySQL**" as DB
+
+' Flujo principal (vertical)
+CTRL --> SRV : llama
+SRV --> REPO : llama
+REPO --> CONN : usa
+CONN --> DB : conecta
+
+' Uso de objetos de datos
+CTRL .right.> DTO : usa
+SRV .right.> DTO : usa
+SRV .> MODEL : usa
+REPO .> MODEL : usa
+
+' Core inicializa y gestiona dependencias
+CORE ..> SRV : configura
+CORE ..> REPO : configura
+
+' Utilidades (soporte transversal)
+UTIL .up.> CTRL
+UTIL .up.> SRV
+UTIL .up.> REPO
+
+@enduml

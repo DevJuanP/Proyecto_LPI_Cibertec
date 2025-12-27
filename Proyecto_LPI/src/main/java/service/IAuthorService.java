@@ -25,4 +25,5 @@ public interface IAuthorService {
             throws SQLException, ClassNotFoundException;
     int getAuthorsWithRentalsCount() throws SQLException, ClassNotFoundException;
     int getTotalAuthorsRentals() throws SQLException, ClassNotFoundException;
+    int getAuthorsWithBooksCount() throws SQLException, ClassNotFoundException;
 }

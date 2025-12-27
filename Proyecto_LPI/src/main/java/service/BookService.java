@@ -72,4 +72,9 @@ public class BookService implements IBookService {
     public List<Book> findAll() throws SQLException, ClassNotFoundException {
         return bookRepository.findAll();
     }
+
+    @Override
+    public int getBooksWithActiveRentalsCount() throws SQLException, ClassNotFoundException {
+        return bookRepository.countBooksWithActiveRentals();
+    }
 }

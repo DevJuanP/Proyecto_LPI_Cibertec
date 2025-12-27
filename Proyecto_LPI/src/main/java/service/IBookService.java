@@ -14,6 +14,8 @@ public interface IBookService {
 
     int getActiveBooksCount() throws SQLException, ClassNotFoundException;
 
+    int getBooksWithActiveRentalsCount() throws SQLException, ClassNotFoundException;
+
     Book findById(String bookId) throws SQLException, ClassNotFoundException;
 
     void save(Book book) throws SQLException, ClassNotFoundException;

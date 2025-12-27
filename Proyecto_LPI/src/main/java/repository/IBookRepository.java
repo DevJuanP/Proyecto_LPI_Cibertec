@@ -20,6 +20,7 @@ public interface IBookRepository {
     boolean existsByIsbn(String isbn) throws SQLException, ClassNotFoundException;
     int count() throws SQLException, ClassNotFoundException;
     int count(String search, String authorId, String categoryId, String bookStatusId) throws SQLException, ClassNotFoundException;
+    int countBooksWithActiveRentals() throws SQLException, ClassNotFoundException;
     LinkedList<Book> findAllPaginated(int offset, int limit) throws SQLException, ClassNotFoundException;
     LinkedList<Book> findAllPaginated(int offset, int limit, String search, String authorId, String categoryId, String bookStatusId)
             throws SQLException, ClassNotFoundException;

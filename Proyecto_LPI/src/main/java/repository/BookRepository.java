@@ -621,6 +621,27 @@ public class BookRepository implements IBookRepository {
         return books;
     }
 
+    @Override
+    public int countBooksWithActiveRentals() throws SQLException, ClassNotFoundException {
+        String sql = 
+            "SELECT COUNT(DISTINCT b.BookId) " +
+            "FROM Book b " +
+            "INNER JOIN BookCopy bc ON b.BookId = bc.BookId " +
+            "INNER JOIN BookCopyStatus bcs ON bc.BookCopyStatusId = bcs.BookCopyStatusId " +
+            "WHERE bcs.BookCopyStatusName = 'Alquilado'";
+        
+        Connection conn = dbContext.getConnection();
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
     private Book mapResultSetToBook(ResultSet rs) throws SQLException {
         Book book = new Book();
         book.setBookId(rs.getString("BookId"));

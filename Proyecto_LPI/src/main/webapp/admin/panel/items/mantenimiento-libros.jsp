@@ -54,7 +54,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <small class="text-muted">En Alquiler</small>
-                        <h4 class="mb-0">-</h4>
+                        <h4 class="mb-0">${booksWithActiveRentals}</h4>
                     </div>
                     <i class="bi bi-arrow-repeat fs-2 text-warning"></i>
                 </div>

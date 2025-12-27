@@ -145,9 +145,11 @@ public class AdminPanelController extends BaseServlet {
         List<Country> countries = countryService.findAll();
         List<Status> statuses = statusService.findAll();
         int activeAuthorsCount = authorService.getActiveAuthorsCount();
+        int authorsWithBooksCount = authorService.getAuthorsWithBooksCount();
         
         request.setAttribute("authorsResult", authorsResult);
         request.setAttribute("activeAuthorsCount", activeAuthorsCount);
+        request.setAttribute("authorsWithBooksCount", authorsWithBooksCount);
         request.setAttribute("countries", countries);
         request.setAttribute("statuses", statuses);
         request.setAttribute("totalAuthors", authorService.getTotalAuthorsCount());
@@ -195,6 +197,7 @@ public class AdminPanelController extends BaseServlet {
         IBookStatusService bookStatusService = getService(IBookStatusService.class);
         ICategoryService categoryService = getService(ICategoryService.class);
         IConfigurationService configurationService = getService(IConfigurationService.class);
+        IBookCopyService bookCopyService = getService(IBookCopyService.class);
         
         int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
@@ -211,9 +214,11 @@ public class AdminPanelController extends BaseServlet {
         ArrayList<BookStatus> bookStatuses = bookStatusService.findAll();
         List<Category> categories = categoryService.findAll();
         int activeBooksCount = bookService.getActiveBooksCount();
+        int booksWithActiveRentals = bookService.getBooksWithActiveRentalsCount();
         
         request.setAttribute("booksResult", booksResult);
         request.setAttribute("activeBooksCount", activeBooksCount);
+        request.setAttribute("booksWithActiveRentals", booksWithActiveRentals);
         request.setAttribute("authors", authors);
         request.setAttribute("bookStatuses", bookStatuses);
         request.setAttribute("categories", categories);

@@ -41,7 +41,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <small class="text-muted">Con Obras</small>
-                        <h4 class="mb-0">-</h4>
+                        <h4 class="mb-0">${authorsWithBooksCount}</h4>
                     </div>
                     <i class="bi bi-check-circle-fill fs-2 text-success"></i>
                 </div>
