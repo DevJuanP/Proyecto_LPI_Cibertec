@@ -7,6 +7,7 @@ import repository.BookCopyStatusRepository;
 import repository.BookRepository;
 import repository.BookStatusRepository;
 import repository.CategoryRepository;
+import repository.ConfigurationRepository;
 import repository.CountryRepository;
 import repository.IAuthorRepository;
 import repository.IBookCopyRepository;
@@ -14,6 +15,7 @@ import repository.IBookCopyStatusRepository;
 import repository.IBookRepository;
 import repository.IBookStatusRepository;
 import repository.ICategoryRepository;
+import repository.IConfigurationRepository;
 import repository.ICountryRepository;
 import repository.IRentalRepository;
 import repository.IRentalStatusRepository;
@@ -31,6 +33,7 @@ import service.BookCopyStatusService;
 import service.BookService;
 import service.BookStatusService;
 import service.CategoryService;
+import service.ConfigurationService;
 import service.CountryService;
 import service.IAuthorService;
 import service.IBookCopyService;
@@ -38,6 +41,7 @@ import service.IBookCopyStatusService;
 import service.IBookService;
 import service.IBookStatusService;
 import service.ICategoryService;
+import service.IConfigurationService;
 import service.ICountryService;
 import service.IRentalService;
 import service.IRoleService;
@@ -94,6 +98,7 @@ public class ServiceConfigurator {
         container.addScoped(IRentalStatusRepository.class, RentalStatusRepository.class);
         container.addScoped(IStatusRepository.class, StatusRepository.class);
         container.addScoped(IRoleRepository.class, RoleRepository.class);
+        container.addScoped(IConfigurationRepository.class, ConfigurationRepository.class);
         
         System.out.println("✓ Repositorios configurados");
     }
@@ -112,7 +117,8 @@ public class ServiceConfigurator {
         container.addScoped(IRoleService.class, RoleService.class);
         container.addScoped(IRentalService.class, RentalService.class);
         container.addScoped(IBookCopyService.class, BookCopyService.class);
-        container.addScoped(IBookCopyStatusService.class, BookCopyStatusService.class);        
+        container.addScoped(IBookCopyStatusService.class, BookCopyStatusService.class);
+        container.addScoped(IConfigurationService.class, ConfigurationService.class);
 
         System.out.println("✓ Servicios de negocio configurados");
     }

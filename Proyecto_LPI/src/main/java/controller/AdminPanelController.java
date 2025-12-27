@@ -22,6 +22,7 @@ import model.BookCopyStatus;
 import model.BookRentalStats;
 import model.BookStatus;
 import model.Category;
+import model.Configuration;
 import model.Country;
 import model.Rental;
 import model.RentalStatus;
@@ -35,6 +36,7 @@ import service.IBookCopyStatusService;
 import service.IBookService;
 import service.IBookStatusService;
 import service.ICategoryService;
+import service.IConfigurationService;
 import service.ICountryService;
 import service.IRentalService;
 import service.IRoleService;
@@ -51,8 +53,6 @@ public class AdminPanelController extends BaseServlet {
     private static final long serialVersionUID = 1L;
     
     private static final String PANEL_JSP = "/admin/panel/index.jsp";
-    
-    private static final int DEFAULT_PAGE_SIZE = 15;
 
     @Override
     protected void doGetScoped(HttpServletRequest request, HttpServletResponse response) 
@@ -106,6 +106,9 @@ public class AdminPanelController extends BaseServlet {
                 case "libros-alquiler":
                     loadActiveRentalsReportData(request);
                     break;
+                case "configuracion":
+                    loadConfigurationData(request);
+                    break;
                 case "dashboard":
                 default:
                     loadDashboardData(request);
@@ -127,9 +130,11 @@ public class AdminPanelController extends BaseServlet {
         IAuthorService authorService = getService(IAuthorService.class);
         ICountryService countryService = getService(ICountryService.class);
         IStatusService statusService = getService(IStatusService.class);
+        IConfigurationService configurationService = getService(IConfigurationService.class);
         
+        int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
-        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        int pageSize = getIntParameter(request, "size", itemsPerPage);
         String search = request.getParameter("search");
         String countryId = request.getParameter("countryId");
         String statusId = request.getParameter("statusId");
@@ -189,9 +194,11 @@ public class AdminPanelController extends BaseServlet {
         IAuthorService authorService = getService(IAuthorService.class);
         IBookStatusService bookStatusService = getService(IBookStatusService.class);
         ICategoryService categoryService = getService(ICategoryService.class);
+        IConfigurationService configurationService = getService(IConfigurationService.class);
         
+        int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
-        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        int pageSize = getIntParameter(request, "size", itemsPerPage);
         String search = request.getParameter("search");
         String authorId = request.getParameter("authorId");
         String bookStatusId = request.getParameter("bookStatusId");
@@ -257,9 +264,11 @@ public class AdminPanelController extends BaseServlet {
         IUserService userService = getService(IUserService.class);
         IStatusService statusService = getService(IStatusService.class);
         IRoleService roleService = getService(IRoleService.class);
+        IConfigurationService configurationService = getService(IConfigurationService.class);
         
+        int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
-        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        int pageSize = getIntParameter(request, "size", itemsPerPage);
         String search = request.getParameter("search");
         String roleId = request.getParameter("roleId");
         String statusId = request.getParameter("statusId");
@@ -315,9 +324,11 @@ public class AdminPanelController extends BaseServlet {
         IBookCopyService bookCopyService = getService(IBookCopyService.class);
         IBookService bookService = getService(IBookService.class);
         IBookCopyStatusRepository bookCopyStatusRepository = getService(IBookCopyStatusRepository.class);
+        IConfigurationService configurationService = getService(IConfigurationService.class);
         
+        int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
-        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        int pageSize = getIntParameter(request, "size", itemsPerPage);
         String search = request.getParameter("search");
         String bookId = request.getParameter("bookId");
         String bookStatusId = request.getParameter("bookStatusId");
@@ -380,9 +391,11 @@ public class AdminPanelController extends BaseServlet {
         IRentalService rentalService = getService(IRentalService.class);
         IUserService userService = getService(IUserService.class);
         IBookCopyService bookCopyService = getService(IBookCopyService.class);
+        IConfigurationService configurationService = getService(IConfigurationService.class);
         
+        int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
-        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        int pageSize = getIntParameter(request, "size", itemsPerPage);
         String search = request.getParameter("search");
         String userId = request.getParameter("userId");
         String rentalStatusId = request.getParameter("rentalStatusId");
@@ -416,21 +429,25 @@ public class AdminPanelController extends BaseServlet {
      * Carga los datos para el reporte de libros actualmente en alquiler.
      */
     private void loadActiveRentalsReportData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        IConfigurationService configurationService = getService(IConfigurationService.class);
+        
+        int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
-        int pageSize = getIntParameter(request, "size", DEFAULT_PAGE_SIZE);
+        int pageSize = getIntParameter(request, "size", itemsPerPage);
         String search = request.getParameter("search");
         String statusFilter = request.getParameter("status");
         String dateFrom = request.getParameter("dateFrom");
         String dateTo = request.getParameter("dateTo");
+        int dueSoonDays = configurationService.getIntValue("RentalRiskDays", 1);
 
         IRentalService rentalService = getService(IRentalService.class);
         
         PagedResult<Rental> activeRentals = rentalService.findActiveRentals(
-            currentPage, pageSize, search, statusFilter, 3, dateFrom, dateTo);
+            currentPage, pageSize, search, statusFilter, dueSoonDays, dateFrom, dateTo);
         
         int totalActiveRentals = rentalService.getActiveRentalsCount();
-        int onTimeRentals = rentalService.getOnTimeRentalsCount(3); // Por vencer en 3 días
-        int dueSoonRentals = rentalService.getDueSoonRentalsCount(3); // Por vencer en 3 días
+        int onTimeRentals = rentalService.getOnTimeRentalsCount(dueSoonDays);
+        int dueSoonRentals = rentalService.getDueSoonRentalsCount(dueSoonDays);
         int overdueRentals = rentalService.getOverdueRentalsCount();
         
         request.setAttribute("activeRentals", activeRentals);
@@ -438,6 +455,7 @@ public class AdminPanelController extends BaseServlet {
         request.setAttribute("onTimeRentals", onTimeRentals);
         request.setAttribute("dueSoonRentals", dueSoonRentals);
         request.setAttribute("overdueRentals", overdueRentals);
+        request.setAttribute("dueSoonDays", dueSoonDays);
 
         request.setAttribute("searchValue", search != null ? search : "");
         request.setAttribute("statusValue", statusFilter != null ? statusFilter : "");
@@ -534,6 +552,14 @@ public class AdminPanelController extends BaseServlet {
         request.setAttribute("availableCopies", availableCopies);
         request.setAttribute("recentRentals", recentRentals);
         request.setAttribute("topBooks", topBooks);
+    }
+
+    private void loadConfigurationData(HttpServletRequest request) throws SQLException, ClassNotFoundException {
+        IConfigurationService configService = getService(IConfigurationService.class);
+        
+        List<Configuration> configurations = configService.getAllConfigurations();
+        
+        request.setAttribute("configurations", configurations);
     }
 
     /**

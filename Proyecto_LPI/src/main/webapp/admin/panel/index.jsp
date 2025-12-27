@@ -84,7 +84,7 @@
                 <small class="text-white-50 text-uppercase fw-bold">Sistema</small>
             </div>
             
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="?page=configuracion">
                 <i class="bi bi-gear"></i>
                 <span>Configuración</span>
             </a>
@@ -139,6 +139,9 @@
                     break;
                 case "libros-alquiler":
                     contentPage = "items/libros-alquiler.jsp";
+                    break;
+                case "configuracion":
+                    contentPage = "items/configuracion.jsp";
                     break;
                 default:
                     contentPage = "items/dashboard.jsp";

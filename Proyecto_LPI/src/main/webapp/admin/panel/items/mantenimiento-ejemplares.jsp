@@ -258,7 +258,7 @@
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-danger" 
-                                                        onclick="deleteBookCopy('${copy.bookCopyId}')"
+                                                        onclick="deleteBookCopy('${copy.bookCopyId}', '${fn:escapeXml(copy.book.title)}', '${copy.book.isbn}')"
                                                         data-bs-toggle="tooltip" title="Eliminar">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
@@ -457,6 +457,43 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteBookCopyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar el ejemplar del libro:</p>
+                <div class="alert alert-light border mb-3">
+                    <h6 class="mb-1"><strong id="deleteBookCopyTitle"></strong></h6>
+                    <small class="text-muted">ISBN: <code id="deleteBookCopyIsbn"></code></small>
+                </div>
+                <p class="text-danger mb-0">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <form action="${pageContext.request.contextPath}/book-copy" method="post" style="display: inline;">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="bookCopyId" id="deleteBookCopyId">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Manejo de checkboxes
 document.addEventListener('DOMContentLoaded', function() {
@@ -556,20 +593,12 @@ function editBookCopy(bookCopyId) {
     window.location.href = '${pageContext.request.contextPath}/admin/panel?page=edit-ejemplar&id=' + bookCopyId;
 }
 
-function deleteBookCopy(bookCopyId) {
-    if (confirm('¿Está seguro de eliminar este ejemplar? Esta acción no se puede deshacer.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '${pageContext.request.contextPath}/book-copy?action=delete';
-        
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'bookCopyId';
-        input.value = bookCopyId;
-        
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
-    }
+function deleteBookCopy(bookCopyId, bookTitle, bookIsbn) {
+    document.getElementById('deleteBookCopyId').value = bookCopyId;
+    document.getElementById('deleteBookCopyTitle').textContent = bookTitle;
+    document.getElementById('deleteBookCopyIsbn').textContent = bookIsbn;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteBookCopyModal'));
+    modal.show();
 }
 </script>

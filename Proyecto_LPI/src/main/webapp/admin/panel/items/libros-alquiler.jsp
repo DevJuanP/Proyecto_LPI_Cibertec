@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ page import="java.time.LocalDateTime" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.temporal.ChronoUnit" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
@@ -16,7 +17,8 @@
 <c:set var="dateToValue" value="${dateToValue != null ? dateToValue : ''}" />
 <%
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
+    Integer dueSoonDays = (Integer) request.getAttribute("dueSoonDays");
 %>
 
 <div class="content-header">
@@ -164,23 +166,31 @@
                             <c:forEach items="${activeRentals.items}" var="rental">
                                 <% 
                                     model.Rental rental = (model.Rental) pageContext.getAttribute("rental");
+    
+                                    LocalDateTime dueDateTime = rental.getDueDate();
+                                    LocalDate dueDateOnly = dueDateTime.toLocalDate();
+                                    LocalDate nowOnly = now.toLocalDate();
                                     
-                                    long daysRemaining = ChronoUnit.DAYS.between(now, rental.getDueDate());
+                                    long daysRemaining = ChronoUnit.DAYS.between(nowOnly, dueDateOnly);
                                     
                                     String statusLabel = "En Proceso";
                                     String statusClass = "bg-success";
                                     String daysClass = "bg-success";
                                     String daysText = daysRemaining > 1 ? daysRemaining + " días" : "1 día";
                                     
-                                    if (daysRemaining < 0) {
+                                    if (now.isAfter(dueDateTime)) {
                                         statusLabel = "Vencido";
                                         statusClass = "bg-danger";
                                         daysClass = "bg-danger";
-                                        daysText = Math.abs(daysRemaining) > 1 ? Math.abs(daysRemaining) + " días atrasado" : "1 día atrasado";
+                                        
+                                        long daysPassed = ChronoUnit.DAYS.between(dueDateOnly, nowOnly);
+                                        long daysOverdue = daysPassed + 1;
+                                        
+                                        daysText = daysOverdue > 1 ? daysOverdue + " días atrasado" : "1 día atrasado";
                                     } else if (daysRemaining == 0) {
                                         daysText = "Hoy";
                                         daysClass = "bg-warning";
-                                    } else if (daysRemaining <= 3) {
+                                    } else if (daysRemaining <= dueSoonDays) {
                                         daysClass = "bg-warning";
                                     }
                                     

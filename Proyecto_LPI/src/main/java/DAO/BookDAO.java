@@ -1,4 +1,4 @@
-package dao;
+package DAO;
 
 import connection.DatabaseConnection;
 import model.Book;
