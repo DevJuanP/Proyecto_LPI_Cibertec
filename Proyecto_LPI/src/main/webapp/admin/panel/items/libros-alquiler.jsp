@@ -184,7 +184,7 @@
                                         daysClass = "bg-danger";
                                         
                                         long daysPassed = ChronoUnit.DAYS.between(dueDateOnly, nowOnly);
-                                        long daysOverdue = daysPassed + 1;
+                                        long daysOverdue = daysPassed;
                                         
                                         daysText = daysOverdue > 1 ? daysOverdue + " días atrasado" : "1 día atrasado";
                                     } else if (daysRemaining == 0) {
