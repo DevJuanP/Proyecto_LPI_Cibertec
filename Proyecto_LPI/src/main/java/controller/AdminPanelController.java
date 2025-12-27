@@ -197,7 +197,6 @@ public class AdminPanelController extends BaseServlet {
         IBookStatusService bookStatusService = getService(IBookStatusService.class);
         ICategoryService categoryService = getService(ICategoryService.class);
         IConfigurationService configurationService = getService(IConfigurationService.class);
-        IBookCopyService bookCopyService = getService(IBookCopyService.class);
         
         int itemsPerPage = configurationService.getIntValue("ItemsPerPage", 15);
         int currentPage = getIntParameter(request, "p", 1);
