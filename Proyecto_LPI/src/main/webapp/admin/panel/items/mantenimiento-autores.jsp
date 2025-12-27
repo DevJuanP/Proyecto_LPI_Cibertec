@@ -173,7 +173,7 @@
                                 <th>Autor</th>
                                 <th>Pseudónimo</th>
                                 <th>Nacionalidad</th>
-                                <th>Año Nacimiento</th>
+                                <th>Años</th>
                                 <th>Email</th>
                                 <th>Estado</th>
                                 <th style="width: 150px;">Acciones</th>
@@ -229,9 +229,14 @@
                                         <c:choose>
                                             <c:when test="${not empty author.birthYear}">
                                                 ${author.birthYear}
-                                                <c:if test="${not empty author.deathYear}">
-                                                    - ${author.deathYear}
-                                                </c:if>
+                                                <c:choose>
+                                                    <c:when test="${not empty author.deathYear}">
+                                                        - ${author.deathYear}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        - actualidad
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:when>
                                             <c:otherwise>
                                                 <span class="text-muted">-</span>

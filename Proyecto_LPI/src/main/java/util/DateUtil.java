@@ -44,7 +44,7 @@ public class DateUtil {
      */
     public static String formatYear(Integer year) {
         if (year == null) {
-            return "-";
+            return "";
         }
         
         if (year <= 0) {
