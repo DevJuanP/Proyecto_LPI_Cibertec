@@ -201,22 +201,9 @@
                         </div>
                     </div>
                     
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
-                        <label class="form-check-label" for="rememberMe">
-                            Recordar sesión por 30 días
-                        </label>
-                    </div>
-                    
                     <button type="submit" class="btn btn-primary btn-login w-100">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
                     </button>
-                    
-                    <div class="text-center mt-4">
-                        <a href="${pageContext.request.contextPath}/" class="text-decoration-none">
-                            <i class="bi bi-arrow-left me-1"></i>Volver al sitio principal
-                        </a>
-                    </div>
                 </form>
             </div>
         </div>
